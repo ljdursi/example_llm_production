@@ -1,0 +1,14 @@
+# Cluster-internal name for the gateway: http://litellm.llm-service:4000
+# Expose externally via your institution's standard Ingress; the gateway is
+# the only component that should ever be reachable from outside the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+  labels: { app: litellm }
+spec:
+  selector: { app: litellm }
+  ports:
+    - name: http
+      port: 4000
+      targetPort: 4000

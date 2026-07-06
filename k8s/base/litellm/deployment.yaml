@@ -1,0 +1,47 @@
+# Mirror of the `gateway` compose service. The gateway is stateless (all state
+# lives in Postgres), so this is a plain Deployment — later, raising replicas
+# is safe and is the first thing you'd do for gateway availability.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  labels: { app: litellm }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: litellm }
+  template:
+    metadata:
+      labels: { app: litellm }
+    spec:
+      containers:
+        - name: litellm
+          image: ghcr.io/berriai/litellm:main-stable
+          args: ["--config", "/app/config.yaml", "--port", "4000"]
+          ports:
+            - containerPort: 4000
+          env:
+            - name: LITELLM_MASTER_KEY
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: LITELLM_MASTER_KEY } }
+            - name: NVIDIA_API_KEY
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: NVIDIA_API_KEY } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: POSTGRES_PASSWORD } }
+            - name: DATABASE_URL
+              value: postgresql://litellm:$(POSTGRES_PASSWORD)@postgres:5432/litellm
+            - name: STORE_MODEL_IN_DB
+              value: "false"
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          readinessProbe:
+            httpGet: { path: /health/liveliness, port: 4000 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { memory: 2Gi }
+      volumes:
+        - name: config
+          configMap: { name: litellm-config }

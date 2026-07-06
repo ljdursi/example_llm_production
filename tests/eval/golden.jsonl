@@ -1,0 +1,5 @@
+{"model": "coder", "prompt": "Write a Python function called `mean` that returns the arithmetic mean of a list of numbers. Return only the code, no explanation.", "must_contain": ["def mean"], "check": "python_defines_working_function", "function": "mean", "cases": [{"args": [[1, 2, 3]], "expect": 2.0}, {"args": [[10]], "expect": 10.0}]}
+{"model": "coder", "prompt": "What does the Python expression `[x*x for x in range(4)]` evaluate to? Answer with just the list.", "must_contain": ["[0, 1, 4, 9]"]}
+{"model": "coder", "prompt": "In one sentence: what is the time complexity of binary search on a sorted array of n elements?", "must_contain_any": ["O(log n)", "O(log(n))", "logarithmic"]}
+{"model": "general", "prompt": "Which planet in our solar system has the most moons: Mercury, Saturn, or Mars? Answer with one word.", "must_contain_any": ["Saturn", "saturn"]}
+{"model": "general", "prompt": "Summarize in one sentence: 'The mitochondrion is an organelle found in most eukaryotic cells that produces most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy.'", "must_contain_any": ["ATP", "energy"]}

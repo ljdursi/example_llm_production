@@ -1,0 +1,23 @@
+# If your central monitoring runs the Prometheus Operator (kube-prometheus-
+# stack), this makes every model backend Service in the namespace discovered
+# automatically — the k8s-native replacement for the static scrape targets in
+# monitoring/prometheus/prometheus.yml. Check your Prometheus's
+# serviceMonitorSelector: you may need a label like `release: <helm-release>`
+# on this object for it to be picked up.
+#
+# GPU metrics: the GPU Operator can deploy dcgm-exporter with its own
+# ServiceMonitor (`dcgm-exporter.serviceMonitor.enabled=true` in its Helm
+# values) — prefer that over hand-rolling one.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: llm-backends
+  namespace: llm-service
+spec:
+  selector:
+    matchExpressions:
+      - { key: app, operator: In, values: [nim-coder] }  # add each new backend here
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: llm-service
+resources:
+  - namespace.yaml
+  - postgres/statefulset.yaml
+  - postgres/service.yaml
+  - litellm/deployment.yaml
+  - litellm/service.yaml
+
+# The gateway's config is the SAME file the compose stack uses — one source of
+# truth for model routing on both tracks. kustomize won't load files from
+# outside this directory, so the ConfigMap is created from the repo root
+# instead (see k8s/README.md):
+#   kubectl -n llm-service create configmap litellm-config \
+#     --from-file=config.yaml=gateway/litellm-config.yaml \
+#     --dry-run=client -o yaml | kubectl apply -f -
+# Rerun that same command to roll out routing changes (then restart the
+# gateway: kubectl -n llm-service rollout restart deploy/litellm).

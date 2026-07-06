@@ -1,0 +1,92 @@
+# Mirror of the `nim-coder` service in docker-compose.selfhost.yaml: one NIM
+# on one GPU node, written out by hand so every moving part is visible.
+#
+# Prereqs on the cluster:
+#   - NVIDIA GPU Operator (installs drivers/toolkit, makes nvidia.com/gpu schedulable)
+#   - image pull secret for nvcr.io:
+#       kubectl -n llm-service create secret docker-registry ngc-registry \
+#         --docker-server=nvcr.io --docker-username='$oauthtoken' \
+#         --docker-password=$NGC_API_KEY
+#   - llm-secrets containing NGC_API_KEY (see k8s/README.md)
+#
+# Once this pattern is familiar, the NVIDIA NIM Operator
+# (https://github.com/NVIDIA/k8s-nim-operator) replaces this whole file with a
+# ~15-line NIMService custom resource and adds cache management + rollout
+# handling. Learn it long-hand once, then let the operator own it.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nim-coder
+  labels: { app: nim-coder }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: nim-coder }
+  template:
+    metadata:
+      labels: { app: nim-coder }
+      annotations:
+        # Scraped by the ServiceMonitor in k8s/monitoring/.
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      imagePullSecrets:
+        - name: ngc-registry
+      containers:
+        - name: nim
+          image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: NGC_API_KEY
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: NGC_API_KEY } }
+          resources:
+            limits:
+              nvidia.com/gpu: 2        # size to the model card's recommendation
+              memory: 64Gi
+            requests:
+              cpu: "4"
+              memory: 32Gi
+          volumeMounts:
+            - name: model-cache
+              mountPath: /opt/nim/.cache
+            - name: dshm
+              mountPath: /dev/shm
+          # startupProbe gives the first boot (weight download + engine build)
+          # room to finish before liveness kicks in.
+          startupProbe:
+            httpGet: { path: /v1/health/ready, port: 8000 }
+            failureThreshold: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /v1/health/ready, port: 8000 }
+            periodSeconds: 15
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim: { claimName: nim-coder-cache }
+        - name: dshm
+          emptyDir: { medium: Memory, sizeLimit: 16Gi }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nim-coder-cache
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 200Gi   # model weights + built engines; size generously
+---
+# The gateway routes to this name: http://nim-coder.llm-service:8000/v1
+# (that's the api_base to put in gateway/litellm-config.yaml on this track).
+apiVersion: v1
+kind: Service
+metadata:
+  name: nim-coder
+  labels: { app: nim-coder }
+spec:
+  selector: { app: nim-coder }
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

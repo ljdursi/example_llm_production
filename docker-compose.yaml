@@ -1,0 +1,109 @@
+# Phase 0 stack: gateway + database + chat UI (+ optional local monitoring).
+#
+#   make up            → gateway, db, chat UI
+#   make monitoring    → also start a local Prometheus + Grafana
+#                        (skip if you'll scrape from your existing Prometheus —
+#                         see docs/05-monitoring.md)
+#
+# The models themselves are NOT here yet: in Phase 0 they are hosted endpoints
+# at build.nvidia.com, configured in gateway/litellm-config.yaml. Phase 1 adds
+# a self-hosted model via docker-compose.selfhost.yaml.
+
+name: llm-service
+
+services:
+  # ── The gateway: the one component users talk to ──────────────────────────
+  # OpenAI-compatible API on :4000. Handles auth (virtual keys), per-user/team
+  # budgets and spend accounting (persisted in Postgres), and routes each
+  # model name to whatever backend currently serves it.
+  gateway:
+    image: ghcr.io/berriai/litellm:main-stable
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./gateway/litellm-config.yaml:/app/config.yaml:ro
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@db:5432/litellm
+      STORE_MODEL_IN_DB: "false"   # config file is the source of truth (keep it in git)
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Gateway state: users, keys, budgets, spend logs ───────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: litellm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # ── Chat UI for researchers who don't want to write API calls ─────────────
+  # Talks to the gateway like any other client. First signup becomes admin.
+  webui:
+    image: ghcr.io/open-webui/open-webui:main
+    depends_on:
+      gateway:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      OPENAI_API_BASE_URL: http://gateway:4000/v1
+      # The UI is itself just another gateway client. For the pilot it uses the
+      # master key; for real use, mint it a dedicated key (make create-key) so
+      # UI usage shows up separately in accounting.
+      OPENAI_API_KEY: ${LITELLM_MASTER_KEY}
+      ENABLE_OLLAMA_API: "false"
+      WEBUI_NAME: "Research LLM Service"
+    volumes:
+      - webui-data:/app/backend/data
+    restart: unless-stopped
+
+  # ── Optional local monitoring (profile: monitoring) ───────────────────────
+  # If you already run Prometheus/Grafana centrally, DON'T start these; add the
+  # scrape jobs from monitoring/prometheus/prometheus.yml to your central
+  # config instead. These exist so the stack is self-contained for evaluation.
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["monitoring"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles: ["monitoring"]
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin   # pilot only — change or wire to your SSO
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  webui-data:
+  prom-data:
+  grafana-data:

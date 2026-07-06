@@ -1,0 +1,32 @@
+# Scrape config for the LLM service.
+#
+# If you already run central Prometheus/Grafana (you do), copy these
+# scrape_configs into it rather than running the bundled Prometheus — the
+# bundled one exists only so the repo is self-contained. Adjust targets from
+# compose service names (nim-coder, dcgm-exporter) to real hostnames.
+#
+# What to watch, per layer (details in docs/05-monitoring.md):
+#   serving layer (NIM)  → request latency, TTFT, queue depth, KV-cache usage
+#   hardware (DCGM)      → GPU utilization, memory, temperature, power
+#   usage/accounting     → the gateway's /spend API (not Prometheus; LiteLLM's
+#                          native /metrics is enterprise-licensed)
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  # Phase 1+: every NIM (and vLLM, and Dynamo) exposes Prometheus metrics
+  # natively on its serving port at /metrics. One job per model backend.
+  - job_name: nim-coder
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["nim-coder:8000"]
+        labels:
+          model: coder
+
+  # GPU hardware metrics. Run NVIDIA's DCGM exporter on every GPU node:
+  #   docker run -d --gpus all --net host nvcr.io/nvidia/k8s/dcgm-exporter:latest
+  # (On Kubernetes this becomes a DaemonSet — see k8s/monitoring/.)
+  - job_name: dcgm
+    static_configs:
+      - targets: ["dcgm-exporter:9400"]

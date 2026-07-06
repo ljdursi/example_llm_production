@@ -1,0 +1,47 @@
+# Phase 1 overlay: run a NIM on your own GPU(s) behind the same gateway.
+#
+#   docker compose -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d
+#
+# This starts the NIM container but does NOT change routing by itself: to send
+# traffic to it, edit gateway/litellm-config.yaml (the "Phase 1" template
+# there), then `docker compose restart gateway`. Keeping "what's running" and
+# "what gets traffic" as two separate steps is deliberate — it's what lets you
+# warm up, smoke-test, and perf-test a new backend before users touch it.
+#
+# Full walkthrough with sizing notes: docs/03-swapping-in-self-hosted-nim.md
+#
+# Prereqs: NVIDIA driver + nvidia-container-toolkit on the host;
+#          `docker login nvcr.io` with user '$oauthtoken' / password $NGC_API_KEY.
+
+services:
+  nim-coder:
+    # Find the container tag on the model's card at build.nvidia.com or
+    # https://catalog.ngc.nvidia.com → the hosted API and this container are
+    # the SAME model, which is why Phase 0 → 1 changes behavior so little.
+    image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
+    environment:
+      NGC_API_KEY: ${NGC_API_KEY}
+    volumes:
+      # Cache downloaded model weights across restarts (tens of GB; first
+      # start is slow, later starts are minutes).
+      - nim-cache:/opt/nim/.cache
+    ports:
+      - "8000:8000"   # exposed on the host for direct perf testing; the gateway reaches it as http://nim-coder:8000
+    shm_size: 16gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all        # or device_ids: ["0","1"] to pin specific GPUs
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health/ready')"]
+      interval: 30s
+      timeout: 10s
+      retries: 60      # model load + engine build can take a while on first boot
+      start_period: 10m
+    restart: unless-stopped
+
+volumes:
+  nim-cache:

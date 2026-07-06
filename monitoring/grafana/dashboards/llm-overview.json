@@ -1,0 +1,40 @@
+{
+  "__comment": "Deliberately small starter dashboard. NIM's serving metrics follow vLLM's naming; if a panel is empty, curl your NIM's /metrics and adjust the metric names — that exploration is half the point. Richer community dashboards for vLLM/NIM and DCGM can be imported from grafana.com and are linked in docs/05-monitoring.md.",
+  "title": "LLM Service — Overview",
+  "uid": "llm-overview",
+  "schemaVersion": 39,
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "timeseries", "title": "Requests running / waiting (per backend)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "num_requests_running", "legendFormat": "{{model}} running" },
+        { "expr": "num_requests_waiting", "legendFormat": "{{model}} queued" }
+      ]
+    },
+    {
+      "id": 2, "type": "timeseries", "title": "Time to first token, p50 / p95 (s)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum by (le) (rate(time_to_first_token_seconds_bucket[5m])))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(time_to_first_token_seconds_bucket[5m])))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "id": 3, "type": "timeseries", "title": "Generation throughput (tokens/s)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "rate(generation_tokens_total[5m])", "legendFormat": "{{model}}" }
+      ]
+    },
+    {
+      "id": 4, "type": "timeseries", "title": "GPU utilization & memory (DCGM)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "DCGM_FI_DEV_GPU_UTIL", "legendFormat": "gpu{{gpu}} util %" },
+        { "expr": "DCGM_FI_DEV_FB_USED / 1024", "legendFormat": "gpu{{gpu}} mem GiB" }
+      ]
+    }
+  ]
+}

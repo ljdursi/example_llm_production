@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# THE file to understand in this repo.
+#
+# Each entry in model_list maps a *stable, user-facing model name* (what
+# researchers put in their tools) to *whatever currently serves it*. Growing
+# the service = editing litellm_params here; users never reconfigure anything.
+#
+# Phase 0 (now):   every model is a hosted endpoint at build.nvidia.com.
+# Phase 1:         change api_base to your own NIM container. That's the
+#                  whole migration. See docs/03-swapping-in-self-hosted-nim.md.
+#
+# Browse available hosted models at https://build.nvidia.com — every model
+# card shows its exact id (the string after "openai/" below).
+# ─────────────────────────────────────────────────────────────────────────────
+
+model_list:
+  # ── "coder": the initial use case — research software development ─────────
+  # The "openai/" prefix means "speak the OpenAI chat-completions protocol to
+  # api_base". NIM endpoints (hosted or self-hosted) are OpenAI-compatible, so
+  # this same stanza works for both — which is exactly why swapping is easy.
+  - model_name: coder
+    litellm_params:
+      model: openai/qwen/qwen2.5-coder-32b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+    model_info:
+      description: "Code generation & review for research software development"
+
+  # ── "general": chat, Q&A, and (later) paper summarization ─────────────────
+  - model_name: general
+    litellm_params:
+      model: openai/meta/llama-3.3-70b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NVIDIA_API_KEY
+    model_info:
+      description: "General assistant / summarization"
+
+  # ── Template: adding your NEXT model is a copy-paste of this stanza ────────
+  # - model_name: summarizer            # the stable name users will call
+  #   litellm_params:
+  #     model: openai/<id from the build.nvidia.com model card>
+  #     api_base: https://integrate.api.nvidia.com/v1
+  #     api_key: os.environ/NVIDIA_API_KEY
+  #
+  # ── Template: the SAME model name served by YOUR hardware (Phase 1) ────────
+  # Replace (or duplicate — see routing note below) a stanza with:
+  # - model_name: coder
+  #   litellm_params:
+  #     model: openai/qwen/qwen2.5-coder-32b-instruct
+  #     api_base: http://nim-coder:8000/v1   # your NIM container / k8s Service
+  #     api_key: none                        # self-hosted NIM does no auth; the gateway is the auth layer
+  #
+  # Routing note: if TWO stanzas share a model_name, LiteLLM load-balances
+  # between them. Useful for a zero-downtime migration: add the self-hosted
+  # entry, watch it take traffic, then remove the hosted one.
+
+litellm_settings:
+  drop_params: true          # ignore client params a backend doesn't support, instead of erroring
+  num_retries: 2
+  request_timeout: 600       # generous: big code-gen responses on busy GPUs are slow
+  # Prometheus note: LiteLLM's own /metrics callback is enterprise-licensed.
+  # This repo monitors serving metrics at the NIM/GPU layer and usage via the
+  # gateway's spend API instead — see docs/05-monitoring.md.
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY   # admin credential — mint user keys with it
+  database_url: os.environ/DATABASE_URL       # persistence for keys/users/spend
