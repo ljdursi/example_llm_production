@@ -86,8 +86,19 @@ def test_completion_round_trip(model):
 
 
 def test_spend_is_being_tracked():
-    """Usage accounting: the completions above must show up in spend logs."""
-    logs = _request("/spend/logs")
-    assert isinstance(logs, list) and len(logs) > 0, (
-        "no spend logs — is DATABASE_URL wired to Postgres?"
-    )
+    """Usage accounting: the completions above must show up in spend logs.
+
+    Spend logs are written asynchronously (the gateway batches DB writes), so
+    the rows may land a few seconds after the completion returns — hence the
+    retry loop. Accounting being eventually consistent is normal; it's the
+    ledger, not the request path.
+    """
+    deadline = time.time() + 30
+    while True:
+        logs = _request("/spend/logs")
+        if isinstance(logs, list) and len(logs) > 0:
+            return
+        if time.time() > deadline:
+            break
+        time.sleep(3)
+    pytest.fail("no spend logs after 30s — is DATABASE_URL wired to Postgres?")

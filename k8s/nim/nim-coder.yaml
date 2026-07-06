@@ -34,6 +34,9 @@ spec:
         - name: ngc-registry
       containers:
         - name: nim
+          # Pin the tag (a `1.x.y` from the container's NGC catalog page)
+          # before relying on this — keep in sync with
+          # docker-compose.selfhost.yaml; see the note there.
           image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
           ports:
             - containerPort: 8000

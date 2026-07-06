@@ -4,7 +4,7 @@ This is the ambitious end of the roadmap. Nothing here should be built until
 monitoring says so — which is the payoff of having built monitoring first.
 The signals, in escalating order:
 
-1. `num_requests_waiting` sustained > 0 at busy hours → you need more
+1. `vllm:num_requests_waiting` sustained > 0 at busy hours → you need more
    capacity for that model (a second replica, or a bigger GPU).
 2. Multiple replicas running, but TTFT still poor for interactive users →
    naive load balancing is wasting your KV cache → **KV-aware routing**.
@@ -46,15 +46,16 @@ operator/Helm chart) presents an OpenAI-compatible **frontend** — so to the
 gateway it's just another `api_base`. The cutover is, once again, one stanza
 in `gateway/litellm-config.yaml`, validated by the same three test suites,
 observed in the same Grafana. The pattern you've practiced twice
-(hosted → NIM → Dynamo) is the same pattern the third time. And genai-perf
+(hosted → NIM → Dynamo) is the same pattern the third time. And AIPerf
 concurrency sweeps are how you *prove* KV-aware routing helped: compare
 TTFT-vs-concurrency curves before/after, with realistic prefix-heavy
 workloads rather than pure synthetic ones.
 
 **Community alternative:** [llm-d](https://llm-d.ai) (Red Hat/Google/CoreWeave
-lineage, vLLM-based, Kubernetes-native) targets the same problems — KV-cache-
-aware scheduling via the Kubernetes Gateway API Inference Extension — and is
-the right thing to evaluate if you want the CNCF-ecosystem path. The concepts
+lineage, vLLM-based, Kubernetes-native, a CNCF Sandbox project since March
+2026) targets the same problems — KV-cache-aware scheduling via the Kubernetes
+Gateway API Inference Extension — and is the right thing to evaluate if you
+want the CNCF-ecosystem path. The concepts
 transfer one-for-one; this repo's NVIDIA path is Dynamo because that's where
 our support lies.
 
@@ -66,7 +67,7 @@ Two distinct problems; solve them in order of appearance:
   HorizontalPodAutoscaler on CPU. Rarely needed at academic scale.
 - **Model-backend autoscaling** — the hard, expensive one. GPU pods take
   minutes to become ready (weight loading), so autoscale on *leading*
-  indicators from the serving layer — queue depth (`num_requests_waiting`),
+  indicators from the serving layer — queue depth (`vllm:num_requests_waiting`),
   KV-cache pressure — never on GPU utilization (a lagging, often-pinned
   signal). Mechanisms, simplest first:
   1. **KEDA** (CNCF) or an HPA on custom metrics, scaling the NIM Deployment

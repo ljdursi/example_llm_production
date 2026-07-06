@@ -1,0 +1,41 @@
+# CI for the LLM service, GitHub Actions flavor. Copy to
+# .github/workflows/llm-service.yml and add two repository secrets:
+#   LITELLM_MASTER_KEY  — better, a dedicated key: make create-key USER_ID=ci
+#   GATEWAY_URL         — e.g. https://llm.your.edu
+#
+# Note: the runner must be able to reach the gateway. For a campus-internal
+# service that means a self-hosted runner inside the network — which most
+# institutions running GitHub Enterprise already have.
+#
+# Schedule (see docs/04-testing-performance-and-quality.md): smoke on pushes
+# touching the gateway config; smoke + eval nightly against the live service.
+# (Weekly perf is left out here for brevity — mirror the eval job with
+# `pip install aiperf` + `make perf` and a longer cron.)
+
+name: llm-service
+on:
+  push:
+    paths: [gateway/**, tests/**, docker-compose*.yaml]
+  schedule:
+    - cron: "17 6 * * *"   # nightly; an odd minute is kind to shared cron load
+
+env:
+  LITELLM_MASTER_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
+  GATEWAY_URL: ${{ secrets.GATEWAY_URL }}
+
+jobs:
+  smoke:
+    runs-on: [self-hosted]   # or ubuntu-latest if the gateway is reachable
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pytest
+      - run: make smoke
+
+  eval:
+    if: github.event_name == 'schedule'
+    needs: smoke
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pytest
+      - run: make eval

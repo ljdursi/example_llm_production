@@ -10,7 +10,7 @@ routine operation instead of a leap of faith.
 | Suite | Question | Tool | When to run |
 |---|---|---|---|
 | `tests/smoke/` | Is the service up and correctly wired? | pytest, stdlib only | after every change; ~30s |
-| `tests/perf/` | How fast, and how many users can it carry? | genai-perf (NVIDIA OSS) | baseline now; before/after every backend change; when users report slowness |
+| `tests/perf/` | How fast, and how many users can it carry? | AIPerf (NVIDIA OSS) | baseline now; before/after every backend change; when users report slowness |
 | `tests/eval/` | Is the model behind each name good enough? | pytest goldens → NeMo Evaluator / lm-eval-harness | before/after every backend or model-version change |
 
 Each suite's own README/docstring covers mechanics; this page is the *why and
@@ -49,9 +49,12 @@ infrastructure; the probes grow with your users' real prompts.
 
 ## Toward CI
 
-Wiring these into whatever CI your institution runs (GitLab CI, GitHub
-Actions, Jenkins) is straightforward since each suite is one make target —
-e.g. smoke on every push of a config change, smoke+eval nightly against the
+Wiring these into whatever CI your institution runs is straightforward since
+each suite is one make target — and rather than describe it, this repo ships
+two ready-to-adapt examples in [`ci/`](../ci/): a GitLab CI pipeline
+(`ci/gitlab-ci.yml`) and a GitHub Actions workflow
+(`ci/github-actions-smoke.yml`), both implementing the same schedule: smoke on
+every push that touches the gateway config, smoke+eval nightly against the
 live service, perf weekly with results committed. A nightly smoke+eval run is
 also your cheapest availability monitor: it fails loudly the morning after
 something quietly broke — an entirely appropriate alerting story for a

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Performance testing with genai-perf (NVIDIA's open-source LLM load generator,
-# part of the Triton perf_analyzer project).
+# Performance testing with AIPerf (NVIDIA's open-source LLM load generator,
+# github.com/ai-dynamo/aiperf — the successor to genai-perf, whose CLI it
+# keeps; NVIDIA's NIM benchmarking guides now use AIPerf).
 #
 #   make perf                 # test the 'coder' model through the gateway
 #   make perf MODEL=general
-#   CONCURRENCY=8 tests/perf/run-genai-perf.sh coder
+#   CONCURRENCY=8 tests/perf/run-perf.sh coder
 #
 # Reports TTFT (time to first token), inter-token latency, request latency,
 # and output tokens/sec — the four numbers that define LLM service feel.
@@ -24,28 +25,37 @@ cd "$(dirname "$0")"
 source ../../.env 2>/dev/null || true
 : "${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY (or put it in .env)}"
 
+# AIPerf is a plain pip package. Use it if installed; otherwise run it
+# ephemerally via uv (https://docs.astral.sh/uv/) if that's available.
+if command -v aiperf >/dev/null 2>&1; then
+  AIPERF=(aiperf)
+elif command -v uvx >/dev/null 2>&1; then
+  AIPERF=(uvx aiperf)
+else
+  echo "aiperf not found. Install it with one of:" >&2
+  echo "  pip install aiperf          (in a venv)" >&2
+  echo "  pipx install aiperf" >&2
+  echo "  uv tool install aiperf" >&2
+  exit 1
+fi
+
 STAMP=$(date +%Y%m%d-%H%M%S)
 OUTDIR="results/${MODEL}-${STAMP}"
 mkdir -p "$OUTDIR"
 
-# genai-perf ships in the Triton SDK container, so no local install is needed.
-# (Alternative: pip install genai-perf into a venv and drop the docker wrapper.)
-docker run --rm --net host \
-  -v "$(pwd)/${OUTDIR}:/artifacts" \
-  -e OPENAI_API_KEY="${LITELLM_MASTER_KEY}" \
-  nvcr.io/nvidia/tritonserver:25.01-py3-sdk \
-  genai-perf profile \
-    --model "$MODEL" \
-    --endpoint-type chat \
-    --url "${GATEWAY_URL}" \
-    --streaming \
-    --synthetic-input-tokens-mean "$ISL" \
-    --output-tokens-mean "$OSL" \
-    --concurrency "$CONCURRENCY" \
-    --request-count "$REQUESTS" \
-    --artifact-dir /artifacts
+"${AIPERF[@]}" profile \
+  --model "$MODEL" \
+  --endpoint-type chat \
+  --url "${GATEWAY_URL}" \
+  --streaming \
+  -H "Authorization: Bearer ${LITELLM_MASTER_KEY}" \
+  --synthetic-input-tokens-mean "$ISL" \
+  --output-tokens-mean "$OSL" \
+  --concurrency "$CONCURRENCY" \
+  --request-count "$REQUESTS" \
+  --artifact-dir "$OUTDIR"
 
 echo
-echo "Results in ${OUTDIR}/ (see profile_export_genai_perf.csv)"
+echo "Results in ${OUTDIR}/"
 echo "Tip: rerun with CONCURRENCY=1 and CONCURRENCY=16 to see how the"
 echo "backend degrades under load — that curve is what capacity planning is."

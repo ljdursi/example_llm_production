@@ -1,9 +1,9 @@
 # Performance testing
 
-`run-genai-perf.sh` drives synthetic load through the gateway with
-[genai-perf](https://github.com/triton-inference-server/perf_analyzer/tree/main/genai-perf)
-(NVIDIA open source) and reports the four numbers that define how an LLM
-service *feels*:
+`run-perf.sh` drives synthetic load through the gateway with
+[AIPerf](https://github.com/ai-dynamo/aiperf) (NVIDIA open source, `pip
+install aiperf`; the successor to genai-perf with the same CLI shape) and
+reports the four numbers that define how an LLM service *feels*:
 
 | Metric | What it is | What users experience |
 |---|---|---|
@@ -34,7 +34,9 @@ Against your own NIM, watch the Grafana overview dashboard while the test runs
 — seeing queue depth and GPU utilization move under load is the fastest way to
 build serving intuition.
 
-**Alternatives:** genai-perf is LLM-aware (it understands tokens and
-streaming). Generic load tools — k6, Locust (both widely used; k6 is CNCF) —
-work too but you'd reimplement token timing yourself; vLLM's `benchmark_serving.py`
-is another solid community option.
+**Alternatives:** AIPerf is LLM-aware (it understands tokens and streaming).
+Generic load tools — k6, Locust (both widely used; k6 is CNCF) — work too but
+you'd reimplement token timing yourself; vLLM's `benchmark_serving.py` is
+another solid community option. (If you find older guides using **genai-perf**:
+same tool lineage, now deprecated in favor of AIPerf — the flags mostly
+transfer.)

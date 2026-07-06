@@ -54,7 +54,7 @@ weight-cache management, rollouts, and (later) autoscaling integration. When
 reached the operating posture this repo was aiming you at.
 
 For non-NIM backends, the same maturity path exists in the community: vLLM's
-Helm charts, or (CNCF-adjacent) [llm-d](https://llm-d.ai) and
+Helm charts, or (CNCF Sandbox since early 2026) [llm-d](https://llm-d.ai) and
 [KServe](https://kserve.github.io/website/) for a general model-serving
 control plane — heavier, but the standard if your institution builds a shared
 ML platform beyond LLMs.

@@ -18,6 +18,14 @@ services:
     # Find the container tag on the model's card at build.nvidia.com or
     # https://catalog.ngc.nvidia.com → the hosted API and this container are
     # the SAME model, which is why Phase 0 → 1 changes behavior so little.
+    #
+    # PIN THE TAG before you rely on this: replace `latest` with the current
+    # version tag from the container's NGC catalog page (NIM tags look like
+    # `1.x.y`). `latest` is here only so the file runs on first contact;
+    # a pinned tag is what makes "rerun the test suites after an upgrade"
+    # meaningful — see docs/08-operating.md. Model generations also move
+    # (Qwen3-Coder NIMs now exist); check the catalog rather than assuming
+    # this model is still the best fit.
     image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
     environment:
       NGC_API_KEY: ${NGC_API_KEY}

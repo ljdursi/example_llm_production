@@ -1,0 +1,17 @@
+# TLS front door for the service — Caddy obtains and renews certificates
+# automatically (Let's Encrypt) once DNS for these hostnames points at this box
+# and ports 80/443 are reachable from the internet. If your institution issues
+# certificates instead, swap the automatic setup for
+#   tls /certs/your.crt /certs/your.key
+# in each site block (and mount the files into the container).
+#
+# Hostnames come from .env: GATEWAY_HOSTNAME and WEBUI_HOSTNAME.
+# Start with:  make tls   — then give users https://{$GATEWAY_HOSTNAME}/v1
+
+{$GATEWAY_HOSTNAME} {
+	reverse_proxy gateway:4000
+}
+
+{$WEBUI_HOSTNAME} {
+	reverse_proxy webui:8080
+}

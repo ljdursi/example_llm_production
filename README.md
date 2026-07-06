@@ -54,12 +54,15 @@ Prerequisites: Docker with the compose plugin, and a (free) API key from
 ```bash
 cp .env.example .env         # then edit: set NVIDIA_API_KEY and the two secrets
 make up                      # gateway + database + chat UI
-make create-key              # mint an API key for your first user
+make create-key USER_ID=you  # mint an API key for your first user
 make smoke                   # verify auth, routing, and a real completion
 ```
 
 Then open http://localhost:8080 for the chat UI, or point any OpenAI-compatible
 client at `http://localhost:4000/v1` with the key you just minted.
+
+Serving users beyond this machine? First run `make tls` — the built-in HTTPS
+front door (keys never cross a network in the clear; docs/01, step 4).
 
 Full walkthrough: [docs/01-getting-started.md](docs/01-getting-started.md).
 
@@ -69,12 +72,15 @@ Full walkthrough: [docs/01-getting-started.md](docs/01-getting-started.md).
 docker-compose.yaml            Phase 0 stack: gateway, Postgres, chat UI
 docker-compose.selfhost.yaml   Phase 1 overlay: adds a self-hosted NIM
 gateway/litellm-config.yaml    THE file to understand: models, routing, auth
+tls/                           Caddyfile for the HTTPS front door (make tls)
 monitoring/                    Prometheus scrape config + Grafana dashboards
 tests/smoke/                   pytest: is the service up and correctly wired?
-tests/perf/                    genai-perf: TTFT, inter-token latency, tok/s
+tests/perf/                    AIPerf: TTFT, inter-token latency, tok/s
 tests/eval/                    golden-answer quality checks + eval-harness pointers
+ci/                            ready-to-adapt GitLab CI / GitHub Actions pipelines
 k8s/                           the same stack as Kubernetes manifests (Phase 2)
-docs/                          pedagogical walkthroughs for every phase
+docs/                          pedagogical walkthroughs for every phase,
+                               plus an operating runbook and a researcher handout
 ```
 
 ## Tooling choices, and their CNCF/community alternatives
@@ -85,17 +91,18 @@ so no choice is a lock-in:
 
 | Role | This repo uses | Alternatives (documented in each doc) |
 |------|----------------|--------------------------------------|
-| Gateway (auth, accounting, routing) | [LiteLLM Proxy](https://docs.litellm.ai) (open source; NVIDIA has no OSS gateway) | Envoy AI Gateway (CNCF), Kong AI Gateway, Apache APISIX |
+| Gateway (auth, accounting, routing) | [LiteLLM Proxy](https://docs.litellm.ai) (open source; NVIDIA has no OSS gateway) | Envoy AI Gateway (CNCF ecosystem, v1.0 GA), Kong AI Gateway, Apache APISIX |
 | Model serving | NVIDIA NIM containers | vLLM, SGLang, llama.cpp — anything OpenAI-compatible slots in identically |
-| Scale-out serving | [NVIDIA Dynamo](https://github.com/ai-dynamo/dynamo) (open source) | llm-d (CNCF-adjacent), vLLM production stack |
-| Perf testing | [genai-perf](https://github.com/triton-inference-server/perf_analyzer) (NVIDIA OSS) | k6, Locust, vLLM benchmark scripts |
+| Scale-out serving | [NVIDIA Dynamo](https://github.com/ai-dynamo/dynamo) (open source) | llm-d (CNCF Sandbox), vLLM production stack |
+| Perf testing | [AIPerf](https://github.com/ai-dynamo/aiperf) (NVIDIA OSS; successor to genai-perf) | k6, Locust, vLLM benchmark scripts |
 | Quality eval | pytest goldens here; [NeMo Evaluator](https://github.com/NVIDIA-NeMo/Evaluator) for depth | EleutherAI lm-evaluation-harness, promptfoo |
 | Monitoring | Prometheus + Grafana (CNCF; feeds your existing infra) | — already the standard |
-| Chat UI | [Open WebUI](https://github.com/open-webui/open-webui) | LibreChat, HuggingFace chat-ui |
+| Chat UI | [Open WebUI](https://github.com/open-webui/open-webui) (note: license adds a branding clause for >50-user deployments) | LibreChat, HuggingFace chat-ui |
 
 ## Reading order for the team
 
 1. [docs/00-architecture.md](docs/00-architecture.md) — why a gateway, why these pieces
 2. [docs/01-getting-started.md](docs/01-getting-started.md) — get Phase 0 running
 3. [docs/02-the-gateway.md](docs/02-the-gateway.md) — keys, budgets, accounting, adding models
-4. Everything else as you need it.
+4. [docs/08-operating.md](docs/08-operating.md) — upgrades and the runbook: read before real users arrive
+5. Everything else as you need it.

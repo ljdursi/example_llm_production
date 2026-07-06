@@ -13,8 +13,14 @@ Each line of golden.jsonl is one probe:
     must_contain      all of these substrings must appear in the reply
     must_contain_any  at least one of these must appear
     check: "python_defines_working_function"
-                      extract Python from the reply, exec it in a sandboxed
-                      namespace, and run `cases` against `function`
+                      extract Python from the reply and execute it in a
+                      SUBPROCESS with a timeout, running `cases` against
+                      `function`. Note this is containment (a hung or crashing
+                      snippet can't take the test run down), NOT a sandbox —
+                      the code runs with your privileges. Run evals from a
+                      dev box or CI runner you'd be comfortable running a
+                      stranger's script on, and keep probes simple enough
+                      to review.
 
 Grow golden.jsonl with prompts from YOUR researchers' real use — five probes
 per model that reflect actual work beat five hundred generic ones. When you
@@ -27,6 +33,8 @@ import json
 import os
 import pathlib
 import re
+import subprocess
+import sys
 import urllib.request
 
 import pytest
@@ -69,6 +77,35 @@ def extract_python(reply: str) -> str:
     return blocks[0] if blocks else reply
 
 
+# Driver run in a child process: reads {code, function, cases} on stdin,
+# executes the model's code, applies the cases, writes results as JSON.
+# Isolation from the test process is containment, not security (see module
+# docstring) — the win is that an infinite loop or sys.exit() in model output
+# becomes a clean test failure instead of a wedged pytest.
+_RUN_CASES_DRIVER = """
+import json, sys
+spec = json.load(sys.stdin)
+ns = {}
+exec(spec["code"], ns)
+fn = ns[spec["function"]]
+print(json.dumps([fn(*case["args"]) for case in spec["cases"]]))
+"""
+
+
+def run_cases_in_subprocess(code: str, function: str, cases: list) -> list:
+    proc = subprocess.run(
+        [sys.executable, "-c", _RUN_CASES_DRIVER],
+        input=json.dumps({"code": code, "function": function, "cases": cases}),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, (
+        f"model code failed to define a working {function!r}:\n{proc.stderr}"
+    )
+    return json.loads(proc.stdout)
+
+
 @pytest.mark.parametrize(
     "g", GOLDENS, ids=[f"{g['model']}:{g['prompt'][:40]}" for g in GOLDENS]
 )
@@ -82,8 +119,6 @@ def test_golden(g):
         assert any(n in reply for n in any_of), f"expected one of {any_of} in reply:\n{reply}"
 
     if g.get("check") == "python_defines_working_function":
-        namespace: dict = {}
-        exec(extract_python(reply), namespace)  # noqa: S102 — model output, run only in CI/dev
-        fn = namespace[g["function"]]
-        for case in g["cases"]:
-            assert fn(*case["args"]) == pytest.approx(case["expect"])
+        results = run_cases_in_subprocess(extract_python(reply), g["function"], g["cases"])
+        for case, got in zip(g["cases"], results):
+            assert got == pytest.approx(case["expect"]), f"{g['function']}{tuple(case['args'])}"

@@ -6,7 +6,7 @@ GATEWAY_URL  ?= http://localhost:4000
 -include .env
 export
 
-.PHONY: help up down logs monitoring selfhost create-key smoke perf eval
+.PHONY: help up down logs tls monitoring selfhost create-key smoke perf eval
 
 help:  ## show this help
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -16,7 +16,11 @@ up:  ## start Phase 0: gateway + db + chat UI
 	@echo "gateway: $(GATEWAY_URL)/v1   chat UI: http://localhost:8080"
 
 down:  ## stop everything (data volumes are kept)
-	$(COMPOSE) --profile monitoring down
+	$(COMPOSE) --profile monitoring --profile tls down
+
+tls:  ## start the HTTPS front door (set GATEWAY_HOSTNAME/WEBUI_HOSTNAME in .env first)
+	$(COMPOSE) --profile tls up -d
+	@echo "gateway: https://$(or $(GATEWAY_HOSTNAME),llm.example.edu)/v1   chat UI: https://$(or $(WEBUI_HOSTNAME),chat.llm.example.edu)"
 
 logs:  ## follow gateway logs
 	$(COMPOSE) logs -f gateway
@@ -27,18 +31,19 @@ monitoring:  ## also start local Prometheus (:9090) + Grafana (:3000)
 selfhost:  ## Phase 1: also start the self-hosted NIM (see docs/03)
 	$(COMPOSE) -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d
 
-create-key:  ## mint a user API key: make create-key USER=alice BUDGET=20
+create-key:  ## mint a user API key: make create-key USER_ID=alice BUDGET=20
+	@test -n "$(USER_ID)" || { echo "usage: make create-key USER_ID=alice [BUDGET=20]"; exit 1; }
 	@curl -s $(GATEWAY_URL)/key/generate \
 	  -H "Authorization: Bearer $(LITELLM_MASTER_KEY)" \
 	  -H "Content-Type: application/json" \
-	  -d '{"user_id": "$(or $(USER_ID),$(USER))", "max_budget": $(or $(BUDGET),null), "budget_duration": "30d"}' \
+	  -d '{"user_id": "$(USER_ID)", "max_budget": $(or $(BUDGET),null), "budget_duration": "30d"}' \
 	  | python3 -m json.tool
 
 smoke:  ## run smoke tests against the running stack
 	cd tests/smoke && python3 -m pytest -v
 
-perf:  ## measure TTFT / inter-token latency / throughput with genai-perf
-	tests/perf/run-genai-perf.sh $(or $(MODEL),coder)
+perf:  ## measure TTFT / inter-token latency / throughput with AIPerf
+	tests/perf/run-perf.sh $(or $(MODEL),coder)
 
 eval:  ## run golden-answer quality checks
 	cd tests/eval && python3 -m pytest -v

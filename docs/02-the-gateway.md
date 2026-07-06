@@ -28,9 +28,10 @@ Two kinds of credentials, never to be confused:
 (all with `Authorization: Bearer $LITELLM_MASTER_KEY`):
 
 ```bash
-# key with a monthly budget, restricted to one model, auto-expiring
+# key with a monthly budget, rate limits, restricted to one model, auto-expiring
 curl http://localhost:4000/key/generate -d '{
   "user_id": "alice", "max_budget": 20, "budget_duration": "30d",
+  "rpm_limit": 60, "tpm_limit": 100000,
   "models": ["coder"], "duration": "180d",
   "metadata": {"group": "smith-lab"}
 }'
@@ -45,6 +46,11 @@ curl http://localhost:4000/team/new -d '{"team_alias": "smith-lab", "max_budget"
 There's also an admin web UI at `http://localhost:4000/ui` (log in with the
 master key) for doing all of this by clicking — handy, but learn the API
 first: your onboarding automation will use it.
+
+Budgets and rate limits solve different problems, so set both: a budget is a
+*monthly* backstop, but the runaway-script-at-2am problem is handled by
+`rpm_limit`/`tpm_limit` (requests and tokens per minute, enforced per key) —
+those are what stop one user from monopolizing the service *right now*.
 
 Budgets are denominated in dollars against LiteLLM's per-model price table.
 For self-hosted models "cost" is notional — set your own per-token prices in
@@ -67,6 +73,12 @@ job and land the results wherever you keep such things; the data is also just
 rows in the `db` Postgres if you'd rather point a BI tool at it. This is the
 service's *billing-grade* usage record; the Prometheus side of observability
 is [05-monitoring.md](05-monitoring.md).
+
+Worth knowing before your privacy office asks: by default the spend log stores
+**metadata** — user, key, model, token counts, cost, timestamps — not prompt or
+response content. (LiteLLM *can* log message content to external stores if you
+turn such callbacks on; don't, unless you've decided to and told your users.)
+State this in whatever you hand researchers — it's usually the first question.
 
 ## Routing: adding models and backends
 
@@ -94,11 +106,14 @@ gateway throughput itself becomes a bottleneck, or platform/networking teams
 want the LLM path on their standard proxy stack. The alternatives:
 
 - **[Envoy AI Gateway](https://aigateway.envoyproxy.io/)** — CNCF ecosystem
-  (built on Envoy Gateway); Kubernetes-native, policy-as-CRDs, token-aware
-  rate limiting. The natural landing spot if your institution standardizes on
-  Envoy. No built-in spend ledger, so you'd own accounting.
+  (built on Envoy Gateway), and production-mature: v1.0 GA since mid-2026 with
+  stable CRDs. Kubernetes-native, policy-as-CRDs, token-aware rate limiting
+  and quota as core features. The natural landing spot if your institution
+  standardizes on Envoy. No built-in spend ledger, so you'd own accounting.
 - **Kong AI Gateway / Apache APISIX** — established API gateways with LLM
-  plugins; right if one is already deployed institutionally.
+  plugins; right if one is already deployed institutionally. (Caveat: several
+  of Kong's advanced AI features are enterprise-tier; APISIX's ai-proxy
+  including token-based rate limiting is OSS.)
 
 Because clients only ever saw "OpenAI API + a base URL + a key," a gateway
 swap is invisible to users — the same trick the gateway plays for backends

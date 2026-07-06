@@ -1,0 +1,49 @@
+# CI for the LLM service, GitLab flavor. Copy into your repo as .gitlab-ci.yml
+# (or `include:` it) and set two CI/CD variables (Settings → CI/CD → Variables,
+# masked): LITELLM_MASTER_KEY  — better, a dedicated key minted for CI:
+#                                make create-key USER_ID=ci
+#          GATEWAY_URL         — e.g. https://llm.your.edu
+#
+# The schedule this implements (see docs/04-testing-performance-and-quality.md):
+#   - smoke on every push that touches the gateway config or the tests
+#   - smoke + eval nightly against the LIVE service  ← cheapest availability
+#     monitor you'll ever run: it fails loudly the morning after something
+#     quietly broke
+#   - perf weekly, artifacts kept, so capacity trends are data, not memory
+# Create the two schedules under CI/CD → Schedules with variables
+# SCHEDULE=nightly (daily) and SCHEDULE=weekly (weekly).
+
+stages: [smoke, eval, perf]
+
+default:
+  image: python:3.12-slim
+  before_script:
+    - pip install --quiet pytest
+
+smoke:
+  stage: smoke
+  script:
+    - make smoke
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      changes: [gateway/**, tests/**, docker-compose*.yaml]
+    - if: '$SCHEDULE'   # also run in every scheduled pipeline
+
+eval:
+  stage: eval
+  script:
+    - make eval
+  rules:
+    - if: '$SCHEDULE'   # nightly and weekly
+
+perf:
+  stage: perf
+  before_script:
+    - pip install --quiet aiperf
+  script:
+    - make perf
+  artifacts:
+    paths: [tests/perf/results/]
+    expire_in: 1 year
+  rules:
+    - if: '$SCHEDULE == "weekly"'

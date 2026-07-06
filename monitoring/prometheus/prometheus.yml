@@ -6,15 +6,25 @@
 # compose service names (nim-coder, dcgm-exporter) to real hostnames.
 #
 # What to watch, per layer (details in docs/05-monitoring.md):
+#   gateway (LiteLLM)    → request rates, errors, tokens per model/key
 #   serving layer (NIM)  → request latency, TTFT, queue depth, KV-cache usage
 #   hardware (DCGM)      → GPU utilization, memory, temperature, power
-#   usage/accounting     → the gateway's /spend API (not Prometheus; LiteLLM's
-#                          native /metrics is enterprise-licensed)
+#   usage/accounting     → the gateway's /spend API + Postgres remains the
+#                          billing-grade record; Prometheus is for dashboards
+#                          and alerts, not invoices
 
 global:
   scrape_interval: 15s
 
 scrape_configs:
+  # The gateway's own metrics (enabled by `callbacks: ["prometheus"]` in
+  # gateway/litellm-config.yaml): litellm_*-prefixed request/token/spend
+  # counters labelled by model and key alias.
+  - job_name: gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gateway:4000"]
+
   # Phase 1+: every NIM (and vLLM, and Dynamo) exposes Prometheus metrics
   # natively on its serving port at /metrics. One job per model backend.
   - job_name: nim-coder
