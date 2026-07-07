@@ -16,6 +16,13 @@ an enterprise-only feature until LiteLLM v1.80.0 (late 2025), and is now plain
 open source. This is your dashboard/alerting view of usage; the *billing-grade*
 record stays in Postgres (see layer 4).
 
+Two version-specific gotchas, verified against the pinned v1.83.x image, worth
+knowing when a gateway panel looks wrong: `:4000/metrics` **307-redirects to
+`/metrics/`** — Prometheus follows it automatically, but a manual check needs
+`curl -L`. And the per-model label on the proxy metrics is **`requested_model`**
+(the served backend is `model_id`), *not* `model` — group by `requested_model`,
+as the starter dashboard's gateway panels now do.
+
 **2. Serving layer — is the model service healthy and keeping up?**
 Every NIM exposes Prometheus metrics natively at `:8000/metrics` (so do vLLM
 and Dynamo — NIM follows vLLM's metric naming, including its `vllm:` prefix).
