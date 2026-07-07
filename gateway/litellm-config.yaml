@@ -32,7 +32,12 @@ model_list:
   # this same stanza works for both — which is exactly why swapping is easy.
   - model_name: coder
     litellm_params:
-      model: openai/qwen/qwen3.5-122b-a10b
+      # Chosen to exist BOTH as a hosted endpoint (Phase 0) and a downloadable
+      # NIM (Phase 1), so the same name survives the self-hosting cutover. Note
+      # it's a 47B-param MoE: self-hosting needs ~2× A100/H100-class GPUs — to
+      # test the Phase 1 *pattern* on smaller hardware, temporarily point this
+      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/03.
+      model: openai/mistralai/mixtral-8x7b-instruct-v0.1
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
       # Per-token prices — see the "A note on pricing" block below. These are
@@ -65,7 +70,7 @@ model_list:
   # Replace (or duplicate — see routing note below) a stanza with:
   # - model_name: coder
   #   litellm_params:
-  #     model: openai/qwen/qwen3.5-122b-a10b   # whatever your NIM actually serves
+  #     model: openai/mistralai/mixtral-8x7b-instruct-v0.1   # whatever your NIM actually serves
   #     api_base: http://nim-coder:8000/v1   # your NIM container / k8s Service
   #     api_key: none                        # self-hosted NIM does no auth; the gateway is the auth layer
   #
