@@ -48,8 +48,10 @@ and [docs/05-monitoring.md](docs/05-monitoring.md).
 
 ## Quick start (Phase 0, ~15 minutes)
 
-Prerequisites: Docker with the compose plugin, and a (free) API key from
-[build.nvidia.com](https://build.nvidia.com).
+Prerequisites: Docker with the compose plugin; `make` and Python ≥3.9 with
+`venv`/`pip` (for the `make` targets and the test suites — on a bare
+Debian/Ubuntu box: `sudo apt-get install make python3-venv python3-pip`); and a
+(free) API key from [build.nvidia.com](https://build.nvidia.com).
 
 ```bash
 cp .env.example .env         # then edit: set NVIDIA_API_KEY and the two secrets
