@@ -52,11 +52,28 @@ Budgets and rate limits solve different problems, so set both: a budget is a
 `rpm_limit`/`tpm_limit` (requests and tokens per minute, enforced per key) —
 those are what stop one user from monopolizing the service *right now*.
 
-Budgets are denominated in dollars against LiteLLM's per-model price table.
-For self-hosted models "cost" is notional — set your own per-token prices in
-the model stanza (`input_cost_per_token`/`output_cost_per_token`) to keep
-budgets meaningful as fair-use accounting, which for an academic service is
-usually the real goal.
+Budgets are denominated in dollars against LiteLLM's per-model price table —
+and LiteLLM has **no price for these model names** (it doesn't recognize custom
+aliases, nor arbitrary hosted/self-hosted endpoints). With no price, every
+request costs $0.00, `/spend` logs $0.00, and a dollar `max_budget` never binds
+— budgets silently do nothing. So you must set per-token prices in the model
+stanza (`input_cost_per_token`/`output_cost_per_token`) to make budgets
+meaningful as fair-use accounting, which for an academic service is usually the
+real goal. **This repo ships deliberately-fake illustrative prices** on both
+models (see the pricing note in `gateway/litellm-config.yaml`) so the budget
+machinery is live out of the box; replace them with your own notional credits
+or, once self-hosting, real amortized cost.
+
+Verify enforcement actually works (do this after any pricing change) — mint a
+tiny budget and spend it:
+
+```bash
+make create-key USER_ID=budget-test BUDGET=0.02      # a few requests' worth
+# fire a handful of completions with the returned key; watch key spend climb:
+curl -s "http://localhost:4000/key/info?key=sk-..." \
+  -H "Authorization: Bearer $LITELLM_MASTER_KEY" | python3 -m json.tool | grep spend
+# once spend ≥ budget, further requests return HTTP 400 with a budget message.
+```
 
 ## Usage accounting
 

@@ -3,6 +3,13 @@
 By the end of this page you'll have a running multi-user LLM service — auth,
 accounting, chat UI, tests — with zero GPUs, on any machine with Docker.
 
+Prerequisites: Docker with the compose plugin, plus `make` and Python ≥3.9 with
+`venv`/`pip` — the `make` targets wrap Docker/curl/pytest, and the smoke and
+eval suites run under pytest in a virtualenv. On a fresh Debian/Ubuntu host
+these aren't always installed; `sudo apt-get install make python3-venv
+python3-pip` covers them. (Prefer not to use `make`? Every target is a one-line
+wrapper — open the `Makefile` and run the command it prints.)
+
 ## 1. Get an upstream API key
 
 Create an account at [build.nvidia.com](https://build.nvidia.com) and generate

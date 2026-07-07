@@ -21,6 +21,18 @@ REQUESTS="${REQUESTS:-32}"             # total requests to measure
 ISL="${ISL:-512}"                      # input sequence length (tokens)
 OSL="${OSL:-256}"                      # output sequence length (tokens)
 
+# AIPerf needs a tokenizer to build synthetic prompts and count tokens
+# client-side. By default it tries to resolve --model as a HuggingFace repo —
+# but MODEL here is a gateway *alias* ("coder"/"general"), which is opaque by
+# design and never a valid HF id, so AIPerf would abort with an ambiguous- or
+# unknown-tokenizer error. Pass one explicitly. gpt2 is a small, ungated
+# default that lets the run work anywhere; for accurate input-token counts set
+# TOKENIZER to the HF repo of the model actually behind this name (e.g.
+# Qwen/Qwen2.5-Coder-32B-Instruct). Counting is approximate across tokenizers,
+# which is fine here: these runs are for diffing against each other, and the
+# gateway/backend report the authoritative token counts in /spend.
+TOKENIZER="${TOKENIZER:-gpt2}"
+
 cd "$(dirname "$0")"
 source ../../.env 2>/dev/null || true
 : "${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY (or put it in .env)}"
@@ -45,6 +57,7 @@ mkdir -p "$OUTDIR"
 
 "${AIPERF[@]}" profile \
   --model "$MODEL" \
+  --tokenizer "$TOKENIZER" \
   --endpoint-type chat \
   --url "${GATEWAY_URL}" \
   --streaming \

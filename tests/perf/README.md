@@ -27,6 +27,24 @@ reports the four numbers that define how an LLM service *feels*:
    part of the serving stack (prefill → TTFT) than long outputs (decode →
    tokens/sec). Test what your researchers will actually send.
 
+## Tokenizer (why `make perf` needs one, and the `TOKENIZER` knob)
+
+AIPerf builds synthetic prompts and counts tokens client-side, so it needs a
+tokenizer. Left to itself it resolves `--model` as a HuggingFace repo id — but
+our `--model` is a gateway *alias* (`coder`, `general`), opaque by design and
+never a valid HF id, so AIPerf aborts with an ambiguous/unknown-tokenizer
+error. `run-perf.sh` therefore passes `--tokenizer` explicitly, defaulting to
+`gpt2` (small, ungated, works anywhere). Override it to match the model
+actually behind the name for accurate input-token counts:
+
+```bash
+TOKENIZER=Qwen/Qwen2.5-Coder-32B-Instruct make perf MODEL=coder
+```
+
+The counts are approximate across tokenizer families, which is fine here —
+these runs exist to be diffed against each other with identical settings, and
+the gateway/backend report the authoritative token counts in `/spend` anyway.
+
 Two caveats when testing *hosted* build.nvidia.com endpoints: you're measuring
 their shared, rate-limited service plus WAN latency (fine as a functional
 baseline, not a capacity statement), and be a good citizen with request counts.

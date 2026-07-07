@@ -14,6 +14,15 @@
 # quickly (the catalog already carries newer generations than the ones below);
 # the stable user-facing names on the left are what insulate your users from
 # that churn — check the catalog when you set this up, not just this file.
+# This is not hypothetical: hosted ids reach end-of-life and start returning
+# HTTP 410 Gone, at which point the *name* keeps working only because you
+# repoint it here. Verify each id resolves before you hand keys out.
+#
+# After ANY edit to this file, reload the gateway so it re-reads the config:
+#   compose:  docker compose restart gateway
+#   k8s:      kubectl -n llm-service rollout restart deploy/litellm
+# (Recreating with `up -d` alone does NOT reload — the config is mounted, and
+# LiteLLM reads it once at startup.)
 # ─────────────────────────────────────────────────────────────────────────────
 
 model_list:
@@ -23,9 +32,14 @@ model_list:
   # this same stanza works for both — which is exactly why swapping is easy.
   - model_name: coder
     litellm_params:
-      model: openai/qwen/qwen2.5-coder-32b-instruct
+      model: openai/qwen/qwen3.5-122b-a10b
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
+      # Per-token prices — see the "A note on pricing" block below. These are
+      # ILLUSTRATIVE, not what NVIDIA charges. Without them, spend logs record
+      # $0.00 for every request and dollar budgets (max_budget) never bind.
+      input_cost_per_token: 0.00001    # $0.01 per 1K input tokens (fake)
+      output_cost_per_token: 0.00003   # $0.03 per 1K output tokens (fake)
     model_info:
       description: "Code generation & review for research software development"
 
@@ -35,6 +49,8 @@ model_list:
       model: openai/meta/llama-3.3-70b-instruct
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
+      input_cost_per_token: 0.00001    # $0.01 per 1K input tokens (fake — see below)
+      output_cost_per_token: 0.00003   # $0.03 per 1K output tokens (fake — see below)
     model_info:
       description: "General assistant / summarization"
 
@@ -49,13 +65,29 @@ model_list:
   # Replace (or duplicate — see routing note below) a stanza with:
   # - model_name: coder
   #   litellm_params:
-  #     model: openai/qwen/qwen2.5-coder-32b-instruct
+  #     model: openai/qwen/qwen3.5-122b-a10b   # whatever your NIM actually serves
   #     api_base: http://nim-coder:8000/v1   # your NIM container / k8s Service
   #     api_key: none                        # self-hosted NIM does no auth; the gateway is the auth layer
   #
   # Routing note: if TWO stanzas share a model_name, LiteLLM load-balances
   # between them. Useful for a zero-downtime migration: add the self-hosted
   # entry, watch it take traffic, then remove the hosted one.
+
+  # ── A note on pricing (the input_cost_per_token / output_cost_per_token above)
+  # LiteLLM denominates budgets in dollars against a per-model price table. It
+  # has NO prices for these custom model names (nor, in general, for arbitrary
+  # hosted or self-hosted endpoints), so unless you supply them every request
+  # costs $0.00, /spend logs show $0.00, and a `max_budget` in dollars can never
+  # be reached — budgets silently do nothing.
+  #
+  # The values above are DELIBERATELY FAKE, present so the budget machinery is
+  # live and demonstrable out of the box. They're calibrated for fair-use
+  # accounting, not real cost: at ~$0.01/$0.03 per 1K in/out tokens, a small
+  # test budget (`make create-key USER_ID=demo BUDGET=0.02`) is exhausted in a
+  # handful of requests — so you can watch enforcement kick in well before the
+  # free tier's request-rate limit does. Replace them with your own notional
+  # per-token rates (fair-use "credits" for an academic service) or, once you
+  # self-host, real amortized cost — and re-run the budget check in docs/02.
 
 litellm_settings:
   drop_params: true          # ignore client params a backend doesn't support, instead of erroring
