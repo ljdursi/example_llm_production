@@ -4,5 +4,5 @@ __pycache__/
 .pytest_cache/
 artifacts/
 tests/perf/results/
-.venv/
+.venv*/
 .claude/
