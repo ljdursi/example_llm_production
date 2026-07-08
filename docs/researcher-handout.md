@@ -64,3 +64,7 @@ and model name. For IDE assistants (Continue.dev, Cline, aider, ...), choose
 
 Contact: [service email / chat channel]. Useful in a report: the model name,
 roughly when, and the error message. Never include your API key.
+
+---
+
+**◀ Prev** [08 · Operating](08-operating.md) · **[Up](../README.md)**

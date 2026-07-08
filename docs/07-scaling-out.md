@@ -95,3 +95,7 @@ users ─▶ gateway (unchanged since Phase 0)
 Note the last line: the hosted endpoints never stop being useful. A hybrid
 estate — self-hosted for the hot paths, hosted for the long tail — is not a
 transitional state; for an academic service it's often the steady state.
+
+---
+
+**◀ Prev** [06 · Kubernetes](06-kubernetes.md) · **[Up](../README.md)** · **Next ▶** [08 · Operating](08-operating.md)

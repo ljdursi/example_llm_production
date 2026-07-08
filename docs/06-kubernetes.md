@@ -67,3 +67,7 @@ becomes your institution's managed Postgres); users still see one URL, and
 their keys survive untouched because they live in the database, not the
 deployment. Kubernetes changed *where things run*, not *what the service is* —
 if users noticed the migration, something went wrong.
+
+---
+
+**◀ Prev** [05 · Monitoring](05-monitoring.md) · **[Up](../README.md)** · **Next ▶** [07 · Scaling out](07-scaling-out.md)

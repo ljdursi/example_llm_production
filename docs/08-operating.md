@@ -65,3 +65,7 @@ is exactly the set of eyes this walk needs.
 
 When you fix something that isn't in this table, add a row. A runbook nobody
 grows is a runbook nobody trusts.
+
+---
+
+**◀ Prev** [07 · Scaling out](07-scaling-out.md) · **[Up](../README.md)** · **Next ▶** [Researcher handout](researcher-handout.md)

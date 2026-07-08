@@ -59,3 +59,7 @@ live service, perf weekly with results committed. A nightly smoke+eval run is
 also your cheapest availability monitor: it fails loudly the morning after
 something quietly broke — an entirely appropriate alerting story for a
 three-nines academic service.
+
+---
+
+**◀ Prev** [03 · Self-hosted NIM](03-swapping-in-self-hosted-nim.md) · **[Up](../README.md)** · **Next ▶** [05 · Monitoring](05-monitoring.md)

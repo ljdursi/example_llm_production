@@ -147,3 +147,7 @@ Next, in whichever order need dictates:
 - wire into your Prometheus/Grafana → [05-monitoring.md](05-monitoring.md)
 - upgrades and a troubleshooting runbook → [08-operating.md](08-operating.md)
 - something to hand your users → [researcher-handout.md](researcher-handout.md)
+
+---
+
+**◀ Prev** [00 · Architecture](00-architecture.md) · **[Up](../README.md)** · **Next ▶** [02 · The gateway](02-the-gateway.md)

@@ -85,3 +85,7 @@ morning outage. Sensible tiers:
    (`litellm_proxy_failed_requests_metric_total`), DCGM thermal alerts.
 3. That's it, until this pilot graduates into something people's deadlines
    depend on — at which point revisit deliberately.
+
+---
+
+**◀ Prev** [04 · Testing](04-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [06 · Kubernetes](06-kubernetes.md)

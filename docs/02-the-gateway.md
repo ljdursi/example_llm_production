@@ -137,3 +137,7 @@ swap is invisible to users — the same trick the gateway plays for backends
 applies to the gateway itself. Keep your model-name conventions and key
 inventory portable (they're in git and Postgres respectively) and the exit
 cost stays low.
+
+---
+
+**◀ Prev** [01 · Getting started](01-getting-started.md) · **[Up](../README.md)** · **Next ▶** [03 · Self-hosted NIM](03-swapping-in-self-hosted-nim.md)

@@ -102,3 +102,7 @@ Users noticed nothing. Their key, URL, and model name are unchanged.
 
 When one box / one replica stops being enough:
 [06-kubernetes.md](06-kubernetes.md), then [07-scaling-out.md](07-scaling-out.md).
+
+---
+
+**◀ Prev** [02 · The gateway](02-the-gateway.md) · **[Up](../README.md)** · **Next ▶** [04 · Testing](04-testing-performance-and-quality.md)

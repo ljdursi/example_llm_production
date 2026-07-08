@@ -86,3 +86,7 @@ Naming what's absent is as instructive as what's present:
   NIMs speak the same OpenAI API with image content parts), not as new
   architecture. That's the test of a good substrate: the ambitious use case
   is boring to add.
+
+---
+
+**[Up: README](../README.md)** · **Next ▶** [01 · Getting started](01-getting-started.md)
