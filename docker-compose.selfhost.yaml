@@ -51,5 +51,37 @@ services:
       start_period: 10m
     restart: unless-stopped
 
+  # ── Optional second NIM for the LoRA walkthrough (docs/07b) ────────────────
+  # A Llama-3.1-8B base with multi-LoRA turned on, so you can compare a
+  # researcher's fine-tune against the base behind the gateway. It's SEPARATE
+  # from nim-coder above because a LoRA adapter only loads on the exact base it
+  # was trained on (the example adapter is a Llama-3.1-8B fine-tune, not qwen).
+  # Uncomment to use; bring it up on its own with:
+  #   docker compose -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d nim-general
+  #
+  # nim-general:
+  #   image: nvcr.io/nim/meta/llama-3.1-8b-instruct:latest   # PIN the tag (see nim-coder note)
+  #   environment:
+  #     NGC_API_KEY: ${NGC_API_KEY}
+  #     NIM_PEFT_SOURCE: /opt/nim/loras       # directory of adapter subdirs; each
+  #                                           # subdir name becomes a selectable model id
+  #     NIM_PEFT_REFRESH_INTERVAL: "60"       # rescan every 60s → add/remove adapters
+  #                                           # without restarting the NIM
+  #   volumes:
+  #     - nim-cache:/opt/nim/.cache
+  #     - ./loras:/opt/nim/loras              # your adapter tree (see docs/07b, step 1)
+  #   ports:
+  #     - "8000:8000"                         # or a different host port if nim-coder also runs
+  #   shm_size: 16gb
+  #   deploy:
+  #     resources: { reservations: { devices: [{ driver: nvidia, count: all, capabilities: [gpu] }] } }
+  #   healthcheck:
+  #     test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health/ready')"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 60
+  #     start_period: 10m
+  #   restart: unless-stopped
+
 volumes:
   nim-cache:

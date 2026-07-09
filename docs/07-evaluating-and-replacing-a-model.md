@@ -12,7 +12,9 @@ here and not in the Phase 0–3 table. **The procedure is phase-independent:** t
 candidate can be another hosted endpoint, a NIM you run, or a vLLM backend, and
 the steps are identical. This page uses a **second hosted model** as the
 candidate, so the whole exercise runs with **no GPU** — the same reason Phase 0
-does.
+does. For a worked, GPU-based instance of this same procedure where the candidate
+is a **LoRA fine-tune of a model you already serve**, see
+[07b-comparing-fine-tunes-with-lora.md](07b-comparing-fine-tunes-with-lora.md).
 
 Two acts with a decision in between: **evaluate**, decide, **migrate**.
 
@@ -110,4 +112,4 @@ too: decide deliberately when quiet substitution is acceptable.
 
 ---
 
-**◀ Prev** [06 · Monitoring](06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [08 · Kubernetes](08-kubernetes.md)
+**◀ Prev** [06 · Monitoring](06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [07b · Comparing fine-tunes (LoRA)](07b-comparing-fine-tunes-with-lora.md)
