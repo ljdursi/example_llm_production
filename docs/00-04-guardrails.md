@@ -1,5 +1,15 @@
 # Guardrails: keeping PII and secrets out of prompts
 
+> **Learning objective.** Choose the guardrail class a research pilot actually
+> needs, then turn on Presidio PII masking/blocking declaratively and verify the
+> observable BLOCK path — adding no extra LLM calls.
+>
+> **Infrastructure** · *Phase 0+ — gateway + Presidio sidecars (opt-in)*.
+> [`docker-compose.guardrails.yaml`](../docker-compose.guardrails.yaml)
+> (`presidio-analyzer` · `presidio-anonymizer`) · the pre-written `guardrails:`
+> block in [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`Makefile`](../Makefile) (`guardrails`).
+
 Guardrails are the checks that run *around* an LLM call — inspecting the request
 before it reaches a model and, optionally, the response before it reaches the
 user. This page comes early on purpose: the moment real people send real prompts

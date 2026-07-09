@@ -1,5 +1,16 @@
 # Testing: wiring, performance, quality
 
+> **Learning objective.** Run the three suites — smoke (wiring), perf
+> (TTFT/latency/throughput), eval (quality) — against the gateway, commit
+> baselines, and wire them into CI so every backend change is gated by the same
+> acceptance tests.
+>
+> **Infrastructure** · *cross-cutting — from Phase 0*.
+> [`tests/smoke/`](../tests/smoke) · [`tests/perf/`](../tests/perf) ·
+> [`tests/eval/`](../tests/eval) · [`Makefile`](../Makefile)
+> (`smoke`/`perf`/`eval`) · [`ci/`](../ci) (`gitlab-ci.yml`,
+> `github-actions-smoke.yml`).
+
 Three test suites, three different questions, all present from Phase 0. The
 shared discipline: **every one of them talks to the gateway, exactly like a
 user** — so a passing suite validates the whole path (auth → routing →

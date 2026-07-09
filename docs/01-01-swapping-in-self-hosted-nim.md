@@ -1,5 +1,15 @@
 # Phase 1: swapping a placeholder for a self-hosted NIM
 
+> **Learning objective.** Bring a model onto your own GPU behind the unchanged
+> gateway: run a NIM via the selfhost overlay, cut routing over with a two-line
+> config change (or a zero-downtime canary), and re-run the suites as the
+> acceptance test — users noticing nothing.
+>
+> **Infrastructure** · *Phase 1 — self-hosted NIM*.
+> [`docker-compose.selfhost.yaml`](../docker-compose.selfhost.yaml) (`nim-coder`) ·
+> the Phase-1 template in [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`Makefile`](../Makefile) (`selfhost`) · `NGC_API_KEY` in [`.env.example`](../.env.example).
+
 The hosted endpoints at build.nvidia.com **are NIM containers run by NVIDIA**.
 Self-hosting means running the same container on your hardware — same model,
 same API, same metrics. That's why this phase is an operations change, not a

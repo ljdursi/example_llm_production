@@ -1,5 +1,15 @@
 # Evaluating and replacing a model
 
+> **Learning objective.** Evaluate a candidate under a *new* name against a bar
+> you set in advance (quality, performance, cost), then migrate live traffic with
+> a canary → watch → cut-over → rollback procedure — no flag-day, no guessing.
+>
+> **Infrastructure** · *lifecycle — phase-independent (runs GPU-free)*.
+> Candidate and load-balancing stanzas in
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`tests/eval/`](../tests/eval) · [`Makefile`](../Makefile) (`eval`/`perf`) ·
+> the `requested_model` split in [`monitoring/`](../monitoring).
+
 Models don't stand still. A better one ships, a cheaper one appears, or the one
 you're using hits end-of-life — hosted ids at build.nvidia.com reach EOL and
 start returning **HTTP 410 Gone** (the note in `gateway/litellm-config.yaml` is

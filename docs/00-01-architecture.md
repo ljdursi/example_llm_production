@@ -1,5 +1,13 @@
 # Architecture: why these pieces
 
+> **Learning objective.** Explain why users talk to a gateway rather than a model
+> server, map each component to the constraint that justifies it, and name what
+> the pilot deliberately leaves out (and why).
+>
+> **Infrastructure** · *conceptual — defines none of its own*. Every component
+> named here is stood up starting in [`00-02-getting-started`](00-02-getting-started.md);
+> the component table below indexes the phase each first appears in.
+
 ## The problem shape
 
 You're standing up shared LLM inference for researchers, as a pilot for a

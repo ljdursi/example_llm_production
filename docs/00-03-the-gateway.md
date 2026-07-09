@@ -1,5 +1,14 @@
 # The gateway: auth, accounting, budgets, and routing
 
+> **Learning objective.** Operate LiteLLM as the service contract: mint and revoke
+> virtual keys with dollar budgets and rate limits, read billing-grade usage, and
+> add a model or backend by editing one config file and reloading the gateway.
+>
+> **Infrastructure** · *Phase 0 — gateway only*.
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) (the single
+> source of truth) · [`Makefile`](../Makefile) (`create-key`) · the `gateway` and
+> `db` services in [`docker-compose.yaml`](../docker-compose.yaml).
+
 The gateway ([LiteLLM Proxy](https://docs.litellm.ai/docs/simple_proxy)) is the
 component your users experience as "the service." This page covers operating
 it. Its configuration is `gateway/litellm-config.yaml` — heavily commented,

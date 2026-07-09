@@ -1,5 +1,17 @@
 # Comparing fine-tunes: a LoRA adapter as the candidate
 
+> **Learning objective.** Serve a LoRA fine-tune alongside its base on one
+> multi-LoRA NIM, compare base vs. adapter with the same eval and perf harness,
+> and decide/migrate via the [`01-02`](01-02-evaluating-and-replacing-a-model.md)
+> procedure — at the base model's cost.
+>
+> **Infrastructure** · *Phase 1+ — self-hosted NIM with multi-LoRA*.
+> The commented `nim-general` service (`NIM_PEFT_SOURCE`) in
+> [`docker-compose.selfhost.yaml`](../docker-compose.selfhost.yaml) · a
+> reader-created `loras/` adapter tree · base/candidate stanzas in
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`tests/eval/`](../tests/eval).
+
 [01-02-evaluating-and-replacing-a-model.md](01-02-evaluating-and-replacing-a-model.md)
 is the general procedure — evaluate a candidate under a new name, decide against
 a bar you set in advance, migrate with a canary. This page is that procedure

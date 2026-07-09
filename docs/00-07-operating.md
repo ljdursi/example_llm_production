@@ -1,5 +1,14 @@
 # Operating the service: network exposure, upgrades, and a small runbook
 
+> **Learning objective.** Keep the running service trustworthy: hold network
+> exposure correct, treat every image-tag bump as a tested upgrade *decision*,
+> and diagnose failures by looking one layer below the symptom.
+>
+> **Infrastructure** · *cross-cutting — all phases*. Pinned image tags in
+> [`docker-compose.yaml`](../docker-compose.yaml) and [`k8s/base/`](../k8s/base) ·
+> [`Makefile`](../Makefile) (`up`/`smoke`/`eval`/`perf`) ·
+> [`tls/Caddyfile`](../tls/Caddyfile).
+
 Phases 0–3 are about *building*; this page is about the day-2 habits that make
 the service trustworthy. None of it is LLM-specific — which is the point: the
 pilot is practice for every service after it.

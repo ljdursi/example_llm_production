@@ -1,5 +1,18 @@
 # Getting started: Phase 0 in an afternoon
 
+> **Learning objective.** Stand up the whole Phase-0 service — gateway, database,
+> chat UI, and TLS front door — on a GPU-free box, mint a budgeted per-user key,
+> and capture baseline performance and quality numbers, every call going through
+> the gateway.
+>
+> **Infrastructure** · *Phase 0 — gateway + hosted models*.
+> [`.env.example`](../.env.example) ·
+> [`docker-compose.yaml`](../docker-compose.yaml) (gateway · db · webui;
+> `--profile tls` adds [`tls/Caddyfile`](../tls/Caddyfile)) ·
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`Makefile`](../Makefile) (`up`/`tls`/`create-key`/`smoke`/`perf`/`eval`) ·
+> [`tests/`](../tests).
+
 By the end of this page you'll have a running multi-user LLM service — auth,
 accounting, chat UI, tests — with zero GPUs, on any machine with Docker.
 

@@ -1,5 +1,16 @@
 # Monitoring: feeding your existing Prometheus/Grafana
 
+> **Learning objective.** Feed the four layers of signal (gateway, serving, GPU,
+> ledger) into your Prometheus/Grafana: scrape the gateway and backend metrics,
+> import the starter dashboard, and size alerting for a three-nines service.
+>
+> **Infrastructure** · *cross-cutting — from Phase 0 (real serving/GPU signal
+> from Phase 1)*. [`monitoring/prometheus/prometheus.yml`](../monitoring/prometheus/prometheus.yml) ·
+> [`monitoring/grafana/`](../monitoring/grafana) (dashboard + provisioning) ·
+> [`Makefile`](../Makefile) (`monitoring`) ·
+> [`k8s/monitoring/servicemonitor.yaml`](../k8s/monitoring/servicemonitor.yaml) ·
+> `callbacks: ["prometheus"]` in [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml).
+
 You already operate Prometheus and Grafana — good, that's the design
 assumption. This stack ships metric *sources* and a starter dashboard; the
 bundled Prometheus/Grafana (`make monitoring`) exist only so the repo is

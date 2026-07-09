@@ -1,5 +1,17 @@
 # Phase 2: Kubernetes
 
+> **Learning objective.** Move the same stack to Kubernetes without changing the
+> service: deploy gateway + db + NIM from the mirrored manifests that share the
+> one gateway config, stand up the GPU Operator, and re-run the suites against the
+> new URL as the migration's acceptance test.
+>
+> **Infrastructure** · *Phase 2 — Kubernetes*.
+> [`k8s/base/`](../k8s/base) (litellm · postgres · namespace) ·
+> [`k8s/nim/`](../k8s/nim) ·
+> [`k8s/monitoring/servicemonitor.yaml`](../k8s/monitoring/servicemonitor.yaml) ·
+> [`k8s/README.md`](../k8s/README.md) · the shared
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml).
+
 ## When (and whether)
 
 Compose on one box is a legitimate way to run this service for a long time.
