@@ -18,18 +18,26 @@ KV-aware routing, autoscaling) changes *what's behind the gateway* without
 changing what your users see. Their API keys, their tooling, the URL in their
 editor config: none of it changes as you get more ambitious.
 
-```
-                      ┌──────────────────────────────────────────────┐
-   researchers ──────▶│  LiteLLM Gateway                             │
-   (API keys,         │  auth · per-user keys · budgets · accounting │
-    IDE plugins,      │  model routing · OpenAI-compatible API       │
-    chat UI)          └───────┬──────────────┬───────────────────────┘
-                              │              │
-                    Phase 0   ▼              ▼   Phase 1+
-                 build.nvidia.com      self-hosted NIM on your GPUs
-                 (hosted NIM APIs)     → Kubernetes (Phase 2)
-                                       → Dynamo, KV-aware routing,
-                                         autoscaling (Phase 3)
+```mermaid
+flowchart LR
+    clients["researchers<br/>API keys · IDE plugins · chat UI"]
+    gw["LiteLLM Gateway<br/>auth · per-user keys · budgets · accounting<br/>model routing · OpenAI-compatible API"]
+    guard["guardrails · PII masking<br/>opt-in — see doc 03"]
+
+    hosted["build.nvidia.com<br/>hosted NIM APIs"]
+    self["self-hosted NIM<br/>on your GPUs"]
+    k8s["Kubernetes"]
+    dynamo["Dynamo · KV-aware routing · autoscaling"]
+
+    clients --> gw
+    gw -.- guard
+    gw -->|Phase 0| hosted
+    gw -->|Phase 1| self
+    self -->|Phase 2| k8s
+    k8s -->|Phase 3| dynamo
+
+    classDef optional stroke-dasharray:4 3,fill:#f6f6f6,color:#555;
+    class guard optional;
 ```
 
 ## The phases
