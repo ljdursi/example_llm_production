@@ -89,7 +89,7 @@ For reporting (the quarterly "who used what" slide), hit these from a cron
 job and land the results wherever you keep such things; the data is also just
 rows in the `db` Postgres if you'd rather point a BI tool at it. This is the
 service's *billing-grade* usage record; the Prometheus side of observability
-is [06-monitoring.md](06-monitoring.md).
+is [00-06-monitoring.md](00-06-monitoring.md).
 
 Worth knowing before your privacy office asks: by default the spend log stores
 **metadata** — user, key, model, token counts, cost, timestamps — not prompt or
@@ -107,7 +107,7 @@ but the three moves worth naming:
    immediately. This is how "summarizer" and multi-modal models arrive later —
    routine, not a project.
 2. **New backend for an existing model** = change `api_base`. This is the
-   Phase 1 migration ([04-swapping-in-self-hosted-nim.md](04-swapping-in-self-hosted-nim.md)).
+   Phase 1 migration ([01-01-swapping-in-self-hosted-nim.md](01-01-swapping-in-self-hosted-nim.md)).
 3. **Two stanzas, same `model_name`** = load balancing across both, which
    also gives you zero-downtime migrations and simple fallback
    (`litellm_settings.fallbacks` can chain models — e.g. retry `coder`
@@ -140,4 +140,4 @@ cost stays low.
 
 ---
 
-**◀ Prev** [01 · Getting started](01-getting-started.md) · **[Up](../README.md)** · **Next ▶** [03 · Guardrails](03-guardrails.md)
+**◀ Prev** [00-02 · Getting started](00-02-getting-started.md) · **[Up](../README.md)** · **Next ▶** [00-04 · Guardrails](00-04-guardrails.md)

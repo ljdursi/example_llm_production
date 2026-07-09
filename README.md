@@ -22,7 +22,7 @@ editor config: none of it changes as you get more ambitious.
 flowchart LR
     clients["researchers<br/>API keys · IDE plugins · chat UI"]
     gw["LiteLLM Gateway<br/>auth · per-user keys · budgets · accounting<br/>model routing · OpenAI-compatible API"]
-    guard["guardrails · PII masking<br/>opt-in — see doc 03"]
+    guard["guardrails · PII masking<br/>opt-in — see doc 00-04"]
 
     hosted["build.nvidia.com<br/>hosted NIM APIs"]
     self["self-hosted NIM<br/>on your GPUs"]
@@ -44,21 +44,21 @@ flowchart LR
 
 | Phase | What changes | GPUs needed | Doc |
 |-------|-------------|-------------|-----|
-| **0. Gateway + hosted models** | Everything in this repo works, models are API calls to build.nvidia.com | none | [docs/01-getting-started.md](docs/01-getting-started.md) |
-| **1. First self-hosted model** | Swap one placeholder for a NIM container on a local GPU box | 1 box | [docs/04-swapping-in-self-hosted-nim.md](docs/04-swapping-in-self-hosted-nim.md) |
-| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/08-kubernetes.md](docs/08-kubernetes.md) |
-| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/09-scaling-out.md](docs/09-scaling-out.md) |
+| **0. Gateway + hosted models** | Everything in this repo works, models are API calls to build.nvidia.com | none | [docs/00-02-getting-started.md](docs/00-02-getting-started.md) |
+| **1. First self-hosted model** | Swap one placeholder for a NIM container on a local GPU box | 1 box | [docs/01-01-swapping-in-self-hosted-nim.md](docs/01-01-swapping-in-self-hosted-nim.md) |
+| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/02-01-kubernetes.md](docs/02-01-kubernetes.md) |
+| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/03-01-scaling-out.md](docs/03-01-scaling-out.md) |
 
 Testing (performance **and** quality) and monitoring are not phases — they are
 present from Phase 0 and grow with you. See
-[docs/05-testing-performance-and-quality.md](docs/05-testing-performance-and-quality.md)
-and [docs/06-monitoring.md](docs/06-monitoring.md).
+[docs/00-05-testing-performance-and-quality.md](docs/00-05-testing-performance-and-quality.md)
+and [docs/00-06-monitoring.md](docs/00-06-monitoring.md).
 
 Neither is **changing what's behind a model name** — a lifecycle activity, not a
 phase. Evaluating and replacing a model
-([docs/07](docs/07-evaluating-and-replacing-a-model.md)), and its worked GPU
+([docs/01-02](docs/01-02-evaluating-and-replacing-a-model.md)), and its worked GPU
 example of comparing a **LoRA fine-tune** against the model you already serve
-([docs/07b](docs/07b-comparing-fine-tunes-with-lora.md)), reuse the same eval and
+([docs/01-03](docs/01-03-comparing-fine-tunes-with-lora.md)), reuse the same eval and
 monitoring you built above.
 
 ## Quick start (Phase 0, ~15 minutes)
@@ -79,9 +79,9 @@ Then open http://localhost:8080 for the chat UI, or point any OpenAI-compatible
 client at `http://localhost:4000/v1` with the key you just minted.
 
 Serving users beyond this machine? First run `make tls` — the built-in HTTPS
-front door (keys never cross a network in the clear; docs/01, step 4).
+front door (keys never cross a network in the clear; docs/00-02, step 4).
 
-Full walkthrough: [docs/01-getting-started.md](docs/01-getting-started.md).
+Full walkthrough: [docs/00-02-getting-started.md](docs/00-02-getting-started.md).
 
 ## What's in the box
 
@@ -119,9 +119,9 @@ so no choice is a lock-in:
 
 ## Reading order for the team
 
-1. [docs/00-architecture.md](docs/00-architecture.md) — why a gateway, why these pieces
-2. [docs/01-getting-started.md](docs/01-getting-started.md) — get Phase 0 running
-3. [docs/02-the-gateway.md](docs/02-the-gateway.md) — keys, budgets, accounting, adding models
-4. [docs/03-guardrails.md](docs/03-guardrails.md) — keep PII/secrets out of prompts; pick your rails
-5. [docs/10-operating.md](docs/10-operating.md) — upgrades and the runbook: read before real users arrive
+1. [docs/00-01-architecture.md](docs/00-01-architecture.md) — why a gateway, why these pieces
+2. [docs/00-02-getting-started.md](docs/00-02-getting-started.md) — get Phase 0 running
+3. [docs/00-03-the-gateway.md](docs/00-03-the-gateway.md) — keys, budgets, accounting, adding models
+4. [docs/00-04-guardrails.md](docs/00-04-guardrails.md) — keep PII/secrets out of prompts; pick your rails
+5. [docs/00-07-operating.md](docs/00-07-operating.md) — upgrades and the runbook: read before real users arrive
 6. Everything else as you need it.

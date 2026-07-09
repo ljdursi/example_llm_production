@@ -1,6 +1,6 @@
 # Comparing fine-tunes: a LoRA adapter as the candidate
 
-[07-evaluating-and-replacing-a-model.md](07-evaluating-and-replacing-a-model.md)
+[01-02-evaluating-and-replacing-a-model.md](01-02-evaluating-and-replacing-a-model.md)
 is the general procedure — evaluate a candidate under a new name, decide against
 a bar you set in advance, migrate with a canary. This page is that procedure
 made **concrete**, with the candidate that comes up most often on an academic
@@ -14,7 +14,7 @@ hundred MB of low-rank deltas over frozen base weights; NVIDIA NIM serves
 a file copy and a config stanza — **not** a second model's worth of GPU. The
 same GPUs, the same base weights, one extra name at the gateway.
 
-> **This is Phase 1+ — it needs a GPU.** Unlike doc 07's no-GPU hosted-vs-hosted
+> **This is Phase 1+ — it needs a GPU.** Unlike doc 01-02's no-GPU hosted-vs-hosted
 > comparison, you can't upload your own adapter to build.nvidia.com. You need a
 > self-hosted NIM (doc 04) whose base model is one the adapter was trained on.
 > The worked example below runs on a **single ~24 GB GPU** (Llama-3.1-8B).
@@ -43,7 +43,7 @@ stanzas pointing at the **same `api_base`**, differing only in the model string:
       api_key: none
 ```
 
-Users on `general` are untouched while you evaluate `general-lora` — the doc 07
+Users on `general` are untouched while you evaluate `general-lora` — the doc 01-02
 pattern, now costing one adapter directory instead of a whole second model.
 
 ## 1. Get an adapter and lay it out the way NIM expects
@@ -142,7 +142,7 @@ for M in general general-lora; do
 done
 ```
 
-**Then score it like any candidate.** Everything doc 07 says about scoring
+**Then score it like any candidate.** Everything doc 01-02 says about scoring
 applies unchanged — the point of the shared eval harness is that the candidate's
 *nature* (LoRA vs different model) doesn't change the procedure:
 
@@ -162,31 +162,31 @@ applies unchanged — the point of the shared eval harness is that the candidate
 
 - **The head-to-head on the target task.** Dialect quality has no golden string;
   use **LLM-as-judge** (NeMo Evaluator, or promptfoo's side-by-side) exactly as
-  doc 07 describes — "does `general-lora` answer in convincing Pontic more often
+  doc 01-02 describes — "does `general-lora` answer in convincing Pontic more often
   than `general`?" Point either at the gateway, at each name in turn.
 
 - **Performance.** `make perf MODEL=general` vs `make perf MODEL=general-lora`.
   Expect a **small** per-token cost from the adapter's extra GEMMs; NIM batches
   heterogeneous adapters into fused kernels, so it's usually minor, but it's a
   number you should have, not assume — see
-  [05-testing-performance-and-quality.md](05-testing-performance-and-quality.md).
+  [00-05-testing-performance-and-quality.md](00-05-testing-performance-and-quality.md).
 
 - **Cost** is the one axis that's *identical* — same base, same GPUs, same
   per-token price. That asymmetry is often the whole argument for a fine-tune
   over a bigger model: task-specific quality at the base model's cost.
 
-## 4. Decide and migrate — back to doc 07
+## 4. Decide and migrate — back to doc 01-02
 
 From here nothing is LoRA-specific. Write the acceptance bar down first, then run
-([the decision gate](07-evaluating-and-replacing-a-model.md#the-decision-gate)).
+([the decision gate](01-02-evaluating-and-replacing-a-model.md#the-decision-gate)).
 If the adapter clears it, migrate with the same canary → watch → cut over →
 keep-a-rollback steps from
-[doc 07, Act 2](07-evaluating-and-replacing-a-model.md) — give `general` a second
+[doc 01-02, Act 2](01-02-evaluating-and-replacing-a-model.md) — give `general` a second
 stanza pointing at the adapter, watch the `requested_model` split in Grafana,
 then retire `general-lora`. The cutover is a config edit and a restart; the
 adapter file stays on disk, so rollback is a stanza away.
 
-And the doc 07 courtesy to users applies with a LoRA twist: a fine-tune can shift
+And the doc 01-02 courtesy to users applies with a LoRA twist: a fine-tune can shift
 *behavior* subtly (tone, format, a domain lean) even when aggregate quality
 holds. If researchers depend on the old behavior, a one-line changelog entry is
 cheap trust insurance.
@@ -211,4 +211,4 @@ cheap trust insurance.
 
 ---
 
-**◀ Prev** [07 · Replacing a model](07-evaluating-and-replacing-a-model.md) · **[Up](../README.md)** · **Next ▶** [08 · Kubernetes](08-kubernetes.md)
+**◀ Prev** [01-02 · Replacing a model](01-02-evaluating-and-replacing-a-model.md) · **[Up](../README.md)** · **Next ▶** [02-01 · Kubernetes](02-01-kubernetes.md)

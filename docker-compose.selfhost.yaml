@@ -8,7 +8,7 @@
 # "what gets traffic" as two separate steps is deliberate — it's what lets you
 # warm up, smoke-test, and perf-test a new backend before users touch it.
 #
-# Full walkthrough with sizing notes: docs/04-swapping-in-self-hosted-nim.md
+# Full walkthrough with sizing notes: docs/01-01-swapping-in-self-hosted-nim.md
 #
 # Prereqs: NVIDIA driver + nvidia-container-toolkit on the host;
 #          `docker login nvcr.io` with user '$oauthtoken' / password $NGC_API_KEY.
@@ -23,7 +23,7 @@ services:
     # version tag from the container's NGC catalog page (NIM tags look like
     # `1.x.y`). `latest` is here only so the file runs on first contact;
     # a pinned tag is what makes "rerun the test suites after an upgrade"
-    # meaningful — see docs/10-operating.md. Model generations also move
+    # meaningful — see docs/00-07-operating.md. Model generations also move
     # (Qwen3-Coder NIMs now exist); check the catalog rather than assuming
     # this model is still the best fit.
     image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
@@ -51,7 +51,7 @@ services:
       start_period: 10m
     restart: unless-stopped
 
-  # ── Optional second NIM for the LoRA walkthrough (docs/07b) ────────────────
+  # ── Optional second NIM for the LoRA walkthrough (docs/01-03) ────────────────
   # A Llama-3.1-8B base with multi-LoRA turned on, so you can compare a
   # researcher's fine-tune against the base behind the gateway. It's SEPARATE
   # from nim-coder above because a LoRA adapter only loads on the exact base it
@@ -69,7 +69,7 @@ services:
   #                                           # without restarting the NIM
   #   volumes:
   #     - nim-cache:/opt/nim/.cache
-  #     - ./loras:/opt/nim/loras              # your adapter tree (see docs/07b, step 1)
+  #     - ./loras:/opt/nim/loras              # your adapter tree (see docs/01-03, step 1)
   #   ports:
   #     - "8000:8000"                         # or a different host port if nim-coder also runs
   #   shm_size: 16gb

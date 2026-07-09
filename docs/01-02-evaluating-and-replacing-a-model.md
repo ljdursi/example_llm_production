@@ -14,7 +14,7 @@ the steps are identical. This page uses a **second hosted model** as the
 candidate, so the whole exercise runs with **no GPU** — the same reason Phase 0
 does. For a worked, GPU-based instance of this same procedure where the candidate
 is a **LoRA fine-tune of a model you already serve**, see
-[07b-comparing-fine-tunes-with-lora.md](07b-comparing-fine-tunes-with-lora.md).
+[01-03-comparing-fine-tunes-with-lora.md](01-03-comparing-fine-tunes-with-lora.md).
 
 Two acts with a decision in between: **evaluate**, decide, **migrate**.
 
@@ -24,7 +24,7 @@ Two acts with a decision in between: **evaluate**, decide, **migrate**.
 `model_list` stanza — say `coder-next` — pointing at the model you're
 considering. Now you can hit it directly, run suites against it, and let it soak,
 while every real user stays on `coder` untouched. (Adding a model is just a new
-stanza — see [02-the-gateway.md](02-the-gateway.md); there's a commented
+stanza — see [00-03-the-gateway.md](00-03-the-gateway.md); there's a commented
 `coder-next` template in the config to copy.)
 
 ```bash
@@ -38,7 +38,7 @@ code your users need. The signal that matters comes from *your* prompts:
 
 - Build a task-specific eval set from **real, anonymized usage**. You already
   have the tool to anonymize it — run the exported prompts through Presidio
-  ([03-guardrails.md](03-guardrails.md)) before they land in a fixture. This is
+  ([00-04-guardrails.md](00-04-guardrails.md)) before they land in a fixture. This is
   the single highest-leverage thing you can do, and it compounds: the set grows
   with your users and becomes the acceptance gate for every future swap.
 - Run the comparison. This repo's `tests/eval/` goldens are the regression
@@ -60,8 +60,8 @@ code your users need. The signal that matters comes from *your* prompts:
 | Axis | How | Source |
 |---|---|---|
 | Quality | eval set + LLM-as-judge, on *your* tasks | this page / `tests/eval/` |
-| Performance | TTFT, inter-token latency, throughput at your concurrency | `make perf MODEL=coder-next` — [05](05-testing-performance-and-quality.md) |
-| Cost | per-token price × your token mix | the pricing you set in [02](02-the-gateway.md) |
+| Performance | TTFT, inter-token latency, throughput at your concurrency | `make perf MODEL=coder-next` — [00-05](00-05-testing-performance-and-quality.md) |
+| Cost | per-token price × your token mix | the pricing you set in [00-03](00-03-the-gateway.md) |
 
 ## The decision gate
 
@@ -78,14 +78,14 @@ but a judgment made against numbers you committed to in advance.
 ## Act 2 — Migrate
 
 Once the candidate clears the bar, move traffic deliberately. This generalizes
-the cutover you did in Phase 1 ([04-swapping-in-self-hosted-nim.md](04-swapping-in-self-hosted-nim.md));
+the cutover you did in Phase 1 ([01-01-swapping-in-self-hosted-nim.md](01-01-swapping-in-self-hosted-nim.md));
 the mechanics are the gateway's, so no user reconfigures anything.
 
 1. **Canary.** Give the real `coder` name *two* stanzas — the incumbent and the
    candidate — so the gateway load-balances across them (weight the split if you
    want a smaller first dose). A fraction of live traffic now hits the new model.
 2. **Watch.** With real traffic on it, watch the Grafana dashboards and the spend
-   logs ([06-monitoring.md](06-monitoring.md)): error rate, latency, and
+   logs ([00-06-monitoring.md](00-06-monitoring.md)): error rate, latency, and
    per-model cost, split out by the `requested_model` label. This is the check
    your offline eval can't give you.
 3. **Cut over.** When the canary looks good, remove the incumbent stanza (or
@@ -107,9 +107,9 @@ entry in the researcher handout. Most swaps are invisible and need no notice;
 but a capability or behavior shift (a different model family, a much smaller
 model) can change results a researcher is depending on, and silent substitution
 on research work is a trust cost, not just a technical one. The
-`litellm_settings.fallbacks` caveat from [02](02-the-gateway.md) applies here
+`litellm_settings.fallbacks` caveat from [00-03](00-03-the-gateway.md) applies here
 too: decide deliberately when quiet substitution is acceptable.
 
 ---
 
-**◀ Prev** [06 · Monitoring](06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [07b · Comparing fine-tunes (LoRA)](07b-comparing-fine-tunes-with-lora.md)
+**◀ Prev** [01-01 · Self-hosted NIM](01-01-swapping-in-self-hosted-nim.md) · **[Up](../README.md)** · **Next ▶** [01-03 · Comparing fine-tunes (LoRA)](01-03-comparing-fine-tunes-with-lora.md)

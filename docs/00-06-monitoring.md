@@ -49,7 +49,7 @@ the ones we have justified?"
 
 **4. Usage accounting — who used what, exactly?**
 This lives in the **gateway's Postgres**, queried via `/spend` APIs
-([02-the-gateway.md](02-the-gateway.md)) — billing-grade per-user/per-model
+([00-03-the-gateway.md](00-03-the-gateway.md)) — billing-grade per-user/per-model
 records. Don't be tempted to do accounting from the Prometheus side just
 because layer 1 has token counters: metrics are sampled, relabelled, and
 retention-limited by design. The split to keep in your head: **Postgres is
@@ -76,7 +76,7 @@ nobody reads.
 Don't build a paging rotation for a service whose users will tolerate a
 morning outage. Sensible tiers:
 
-1. **Nightly smoke+eval in CI** ([04-testing](05-testing-performance-and-quality.md)) —
+1. **Nightly smoke+eval in CI** ([00-05 · testing](00-05-testing-performance-and-quality.md)) —
    catches "quietly broken" within a day, costs nothing.
 2. **A few Alertmanager rules into your existing channels** (email/Slack):
    gateway `/health/liveliness` failing (blackbox exporter or your uptime
@@ -88,4 +88,4 @@ morning outage. Sensible tiers:
 
 ---
 
-**◀ Prev** [05 · Testing](05-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [07 · Replacing a model](07-evaluating-and-replacing-a-model.md)
+**◀ Prev** [00-05 · Testing](00-05-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [00-07 · Operating](00-07-operating.md)

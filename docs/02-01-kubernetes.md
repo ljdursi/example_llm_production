@@ -10,7 +10,7 @@ Move when at least one of these is true:
 - **You want the platform handling restarts, node failures, and rolling
   upgrades** instead of SSH-and-restart.
 - **Autoscaling is on the horizon** — it's k8s-native machinery
-  ([09-scaling-out.md](09-scaling-out.md) needs this phase first).
+  ([03-01-scaling-out.md](03-01-scaling-out.md) needs this phase first).
 - **Institutional convergence** — if your organization is building k8s
   operational muscle anyway, this service is a good tenant.
 
@@ -70,4 +70,4 @@ if users noticed the migration, something went wrong.
 
 ---
 
-**◀ Prev** [07b · Comparing fine-tunes (LoRA)](07b-comparing-fine-tunes-with-lora.md) · **[Up](../README.md)** · **Next ▶** [09 · Scaling out](09-scaling-out.md)
+**◀ Prev** [01-03 · Comparing fine-tunes (LoRA)](01-03-comparing-fine-tunes-with-lora.md) · **[Up](../README.md)** · **Next ▶** [03-01 · Scaling out](03-01-scaling-out.md)

@@ -3,7 +3,7 @@
 Guardrails are the checks that run *around* an LLM call — inspecting the request
 before it reaches a model and, optionally, the response before it reaches the
 user. This page comes early on purpose: the moment real people send real prompts
-(the end of [01-getting-started.md](01-getting-started.md)), some of them will
+(the end of [00-02-getting-started.md](00-02-getting-started.md)), some of them will
 paste a spreadsheet of names, a patient record, or an API key into the chat box.
 You want a policy for that before it happens, not after.
 
@@ -32,7 +32,7 @@ request → [gateway: authn/budget] → [guardrail check] → [route → backend
 ```
 
 That's why guardrails get their own page rather than living in
-[02-the-gateway.md](02-the-gateway.md): the gateway is one *place* you can
+[00-03-the-gateway.md](00-03-the-gateway.md): the gateway is one *place* you can
 enforce them, but the choice of engine is independent, and some engines aren't
 gateway-native at all.
 
@@ -106,7 +106,7 @@ model; `BLOCK` rejects the whole request. `mode` decides *when*: `pre_call`
 only what's written to your logs/Langfuse, pass the real request through).
 
 **Verify enforcement works** — the same discipline as the budget check in
-[02-the-gateway.md](02-the-gateway.md). Masking is invisible in a normal reply,
+[00-03-the-gateway.md](00-03-the-gateway.md). Masking is invisible in a normal reply,
 so test the observable `BLOCK` path: send an SSN and confirm a rejection.
 
 ```bash
@@ -144,10 +144,10 @@ keep output masking on chat-completions.
 
 Whatever you enable, say so plainly in the researcher handout: what's inspected,
 what's masked vs. blocked, and that (per the privacy note in
-[02-the-gateway.md](02-the-gateway.md)) prompt *content* isn't logged by
+[00-03-the-gateway.md](00-03-the-gateway.md)) prompt *content* isn't logged by
 default. Masking is a safety net, not a license to paste regulated data —
 guardrails reduce blast radius, they don't grant compliance.
 
 ---
 
-**◀ Prev** [02 · The gateway](02-the-gateway.md) · **[Up](../README.md)** · **Next ▶** [04 · Self-hosted NIM](04-swapping-in-self-hosted-nim.md)
+**◀ Prev** [00-03 · The gateway](00-03-the-gateway.md) · **[Up](../README.md)** · **Next ▶** [00-05 · Testing](00-05-testing-performance-and-quality.md)

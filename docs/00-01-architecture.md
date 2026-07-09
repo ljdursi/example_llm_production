@@ -51,7 +51,7 @@ open-source gateway, so this is the one non-NVIDIA choice at the core of the
 stack. The interface it presents (OpenAI API + virtual keys) is a de facto
 standard, so replacing it later with **Envoy AI Gateway** (CNCF, Envoy-based,
 Kubernetes-native) or **Kong AI Gateway** / **Apache APISIX** is realistic;
-see [02-the-gateway.md](02-the-gateway.md).
+see [00-03-the-gateway.md](00-03-the-gateway.md).
 
 ## The component map
 
@@ -89,4 +89,4 @@ Naming what's absent is as instructive as what's present:
 
 ---
 
-**[Up: README](../README.md)** · **Next ▶** [01 · Getting started](01-getting-started.md)
+**[Up: README](../README.md)** · **Next ▶** [00-02 · Getting started](00-02-getting-started.md)

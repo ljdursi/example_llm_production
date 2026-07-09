@@ -15,9 +15,9 @@
 # LiteLLM-native guardrail (guardrail: presidio), it's fully OSS/self-hostable
 # (no SaaS key), and it makes NO extra LLM inference calls — it uses NER +
 # pattern recognizers. The cost is these two extra services. If you'd rather not
-# run them, docs/03-guardrails.md covers the in-process LLM Guard alternative.
+# run them, docs/00-04-guardrails.md covers the in-process LLM Guard alternative.
 #
-# Full walkthrough: docs/03-guardrails.md
+# Full walkthrough: docs/00-04-guardrails.md
 
 services:
   # Detects PII/PHI entities (spaCy NER + recognizers). The gateway reaches it

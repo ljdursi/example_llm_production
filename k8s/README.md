@@ -40,8 +40,8 @@ that needs external exposure; model backends stay cluster-internal.
 Compose is fine for one box. Kubernetes earns its complexity when you have
 **more than one GPU node**, want **restarts/scheduling/upgrades handled for
 you**, or want **autoscaling** (which is k8s-native — see
-`docs/09-scaling-out.md`). Don't move before one of those is true; do read
+`docs/03-01-scaling-out.md`). Don't move before one of those is true; do read
 this directory before then so the move is a translation, not a rewrite.
 
 Operational notes, GPU Operator setup, NIM Operator (which replaces `nim/` with
-a one-screen custom resource), and Helm alternatives: `docs/08-kubernetes.md`.
+a one-screen custom resource), and Helm alternatives: `docs/02-01-kubernetes.md`.
