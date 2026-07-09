@@ -38,8 +38,8 @@ editor config: none of it changes as you get more ambitious.
 |-------|-------------|-------------|-----|
 | **0. Gateway + hosted models** | Everything in this repo works, models are API calls to build.nvidia.com | none | [docs/01-getting-started.md](docs/01-getting-started.md) |
 | **1. First self-hosted model** | Swap one placeholder for a NIM container on a local GPU box | 1 box | [docs/04-swapping-in-self-hosted-nim.md](docs/04-swapping-in-self-hosted-nim.md) |
-| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/07-kubernetes.md](docs/07-kubernetes.md) |
-| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/08-scaling-out.md](docs/08-scaling-out.md) |
+| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/08-kubernetes.md](docs/08-kubernetes.md) |
+| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/09-scaling-out.md](docs/09-scaling-out.md) |
 
 Testing (performance **and** quality) and monitoring are not phases — they are
 present from Phase 0 and grow with you. See
@@ -108,5 +108,5 @@ so no choice is a lock-in:
 2. [docs/01-getting-started.md](docs/01-getting-started.md) — get Phase 0 running
 3. [docs/02-the-gateway.md](docs/02-the-gateway.md) — keys, budgets, accounting, adding models
 4. [docs/03-guardrails.md](docs/03-guardrails.md) — keep PII/secrets out of prompts; pick your rails
-5. [docs/09-operating.md](docs/09-operating.md) — upgrades and the runbook: read before real users arrive
+5. [docs/10-operating.md](docs/10-operating.md) — upgrades and the runbook: read before real users arrive
 6. Everything else as you need it.

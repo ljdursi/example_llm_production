@@ -19,7 +19,7 @@ services:
   # Image tags in this stack are PINNED, deliberately: the gateway holds every
   # user key, so upgrades should be decisions, not surprises. (LiteLLM had a
   # supply-chain incident and a critical auth-bypass CVE in early 2026 — pin a
-  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/09-operating.md.)
+  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/10-operating.md.)
   gateway:
     image: ghcr.io/berriai/litellm:v1.83.14-stable
     depends_on:

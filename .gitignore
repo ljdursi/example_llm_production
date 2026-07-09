@@ -6,3 +6,4 @@ artifacts/
 tests/perf/results/
 .venv*/
 .claude/
+/PLAN-*.md

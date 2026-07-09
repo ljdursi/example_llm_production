@@ -101,7 +101,7 @@ Users noticed nothing. Their key, URL, and model name are unchanged.
   parts in messages) — another stanza, another container, no new architecture.
 
 When one box / one replica stops being enough:
-[07-kubernetes.md](07-kubernetes.md), then [08-scaling-out.md](08-scaling-out.md).
+[08-kubernetes.md](08-kubernetes.md), then [09-scaling-out.md](09-scaling-out.md).
 
 ---
 
