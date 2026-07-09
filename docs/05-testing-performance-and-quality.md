@@ -32,7 +32,7 @@ baseline discipline, and concurrency sweeps are covered in
 without baselines are trivia**; capture them before you need them, commit the
 CSVs, and always compare like-for-like parameters.
 
-Perf tests and monitoring ([05-monitoring.md](05-monitoring.md)) are two views
+Perf tests and monitoring ([06-monitoring.md](06-monitoring.md)) are two views
 of the same thing — run a concurrency sweep while watching the Grafana
 dashboard and you'll see queue depth, KV-cache pressure, and GPU utilization
 *explain* the latency curve. Do this once as a team; it's the fastest serving
@@ -62,4 +62,4 @@ three-nines academic service.
 
 ---
 
-**◀ Prev** [03 · Self-hosted NIM](03-swapping-in-self-hosted-nim.md) · **[Up](../README.md)** · **Next ▶** [05 · Monitoring](05-monitoring.md)
+**◀ Prev** [04 · Self-hosted NIM](04-swapping-in-self-hosted-nim.md) · **[Up](../README.md)** · **Next ▶** [06 · Monitoring](06-monitoring.md)

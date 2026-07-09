@@ -98,4 +98,4 @@ transitional state; for an academic service it's often the steady state.
 
 ---
 
-**◀ Prev** [06 · Kubernetes](06-kubernetes.md) · **[Up](../README.md)** · **Next ▶** [08 · Operating](08-operating.md)
+**◀ Prev** [07 · Kubernetes](07-kubernetes.md) · **[Up](../README.md)** · **Next ▶** [09 · Operating](09-operating.md)

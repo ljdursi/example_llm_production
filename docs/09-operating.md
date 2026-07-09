@@ -9,7 +9,7 @@ pilot is practice for every service after it.
 TLS is part of getting started, not an afterthought — `make tls` and the
 loopback rebind are [01-getting-started.md](01-getting-started.md) step 4,
 and on Kubernetes it's the Ingress + cert-manager path in
-[06-kubernetes.md](06-kubernetes.md). The two rules worth restating as
+[07-kubernetes.md](07-kubernetes.md). The two rules worth restating as
 *operating* rules:
 
 - The **NIM/backends** are never exposed, on any track: only the gateway
@@ -55,12 +55,12 @@ The failure modes you'll actually see, in the order you'll see them:
 | Phase 1 completions 5xx or hang | `curl nim-host:8000/v1/health/ready`; `docker compose logs nim-coder` | NIM restarted and is reloading weights (minutes), or OOM — check `dcgm` / dmesg |
 | Gateway up but no models listed | `make logs` right after start | YAML error in `litellm-config.yaml` — it fails at config parse |
 | Keys work but no spend rows | gateway logs for DB errors | `DATABASE_URL`/Postgres down; spend writes are async, so this fails quietly |
-| Everything slow, nothing down | Grafana: queue depth & KV-cache panels | saturation, not breakage — this is the [07-scaling-out.md](07-scaling-out.md) trigger |
+| Everything slow, nothing down | Grafana: queue depth & KV-cache panels | saturation, not breakage — this is the [08-scaling-out.md](08-scaling-out.md) trigger |
 | Chat UI errors but API fine | webui container logs | UI's gateway key revoked, or UI version bump changed config |
 
 The habit that makes the runbook work: **look at the layer below the symptom.**
 Users see the gateway; the gateway sees the backend; the backend sees the GPU.
-One layer per step, and the monitoring from [05-monitoring.md](05-monitoring.md)
+One layer per step, and the monitoring from [06-monitoring.md](06-monitoring.md)
 is exactly the set of eyes this walk needs.
 
 When you fix something that isn't in this table, add a row. A runbook nobody
@@ -68,4 +68,4 @@ grows is a runbook nobody trusts.
 
 ---
 
-**◀ Prev** [07 · Scaling out](07-scaling-out.md) · **[Up](../README.md)** · **Next ▶** [Researcher handout](researcher-handout.md)
+**◀ Prev** [08 · Scaling out](08-scaling-out.md) · **[Up](../README.md)** · **Next ▶** [Researcher handout](researcher-handout.md)

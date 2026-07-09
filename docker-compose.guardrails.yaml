@@ -1,0 +1,59 @@
+# Guardrails overlay: run Microsoft Presidio (PII detection + masking) as two
+# small sidecars behind the gateway. OPT-IN — not part of the default stack.
+#
+#   make guardrails
+#   # or, explicitly:
+#   docker compose -f docker-compose.yaml -f docker-compose.guardrails.yaml up -d
+#
+# Starting the containers does NOT turn masking on by itself: the gateway only
+# calls them once you uncomment the `guardrails:` block in
+# gateway/litellm-config.yaml and `docker compose restart gateway`. Keeping
+# "what's running" and "what's enforced" as two steps is deliberate — the same
+# pattern as the Phase 1 self-host overlay.
+#
+# Why sidecars and not an in-process library: Presidio is the FIRST-CLASS,
+# LiteLLM-native guardrail (guardrail: presidio), it's fully OSS/self-hostable
+# (no SaaS key), and it makes NO extra LLM inference calls — it uses NER +
+# pattern recognizers. The cost is these two extra services. If you'd rather not
+# run them, docs/03-guardrails.md covers the in-process LLM Guard alternative.
+#
+# Full walkthrough: docs/03-guardrails.md
+
+services:
+  # Detects PII/PHI entities (spaCy NER + recognizers). The gateway reaches it
+  # as http://presidio-analyzer:3000; PRESIDIO_ANALYZER_API_BASE points here.
+  # Registry note: image publishing moved off mcr.microsoft.com (now frozen) to
+  # ghcr.io/data-privacy-stack in mid-2026 — this is the maintained path. Bump
+  # the pinned tag on purpose, like every other image in this stack.
+  presidio-analyzer:
+    image: ghcr.io/data-privacy-stack/presidio-analyzer:2.2.363
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s      # first start loads the spaCy model
+
+  # Applies the action (mask/redact/replace) to entities the analyzer found.
+  # The gateway reaches it as http://presidio-anonymizer:3000.
+  presidio-anonymizer:
+    image: ghcr.io/data-privacy-stack/presidio-anonymizer:2.2.363
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  # Point the gateway at the two services above. Compose merges this into the
+  # `gateway` service from docker-compose.yaml (it does not replace it).
+  gateway:
+    environment:
+      PRESIDIO_ANALYZER_API_BASE: http://presidio-analyzer:3000
+      PRESIDIO_ANONYMIZER_API_BASE: http://presidio-anonymizer:3000
+    depends_on:
+      presidio-analyzer:
+        condition: service_healthy
+      presidio-anonymizer:
+        condition: service_healthy

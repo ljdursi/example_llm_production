@@ -4,7 +4,7 @@
 #                                make create-key USER_ID=ci
 #          GATEWAY_URL         — e.g. https://llm.your.edu
 #
-# The schedule this implements (see docs/04-testing-performance-and-quality.md):
+# The schedule this implements (see docs/05-testing-performance-and-quality.md):
 #   - smoke on every push that touches the gateway config or the tests
 #   - smoke + eval nightly against the LIVE service  ← cheapest availability
 #     monitor you'll ever run: it fails loudly the morning after something
