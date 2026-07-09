@@ -23,7 +23,7 @@ services:
     # version tag from the container's NGC catalog page (NIM tags look like
     # `1.x.y`). `latest` is here only so the file runs on first contact;
     # a pinned tag is what makes "rerun the test suites after an upgrade"
-    # meaningful — see docs/09-operating.md. Model generations also move
+    # meaningful — see docs/10-operating.md. Model generations also move
     # (Qwen3-Coder NIMs now exist); check the catalog rather than assuming
     # this model is still the best fit.
     image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest

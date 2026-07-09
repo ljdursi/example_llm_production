@@ -10,7 +10,7 @@ Move when at least one of these is true:
 - **You want the platform handling restarts, node failures, and rolling
   upgrades** instead of SSH-and-restart.
 - **Autoscaling is on the horizon** — it's k8s-native machinery
-  ([08-scaling-out.md](08-scaling-out.md) needs this phase first).
+  ([09-scaling-out.md](09-scaling-out.md) needs this phase first).
 - **Institutional convergence** — if your organization is building k8s
   operational muscle anyway, this service is a good tenant.
 
@@ -70,4 +70,4 @@ if users noticed the migration, something went wrong.
 
 ---
 
-**◀ Prev** [06 · Monitoring](06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [08 · Scaling out](08-scaling-out.md)
+**◀ Prev** [07 · Replacing a model](07-evaluating-and-replacing-a-model.md) · **[Up](../README.md)** · **Next ▶** [09 · Scaling out](09-scaling-out.md)

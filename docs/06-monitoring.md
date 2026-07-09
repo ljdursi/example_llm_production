@@ -88,4 +88,4 @@ morning outage. Sensible tiers:
 
 ---
 
-**◀ Prev** [05 · Testing](05-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [07 · Kubernetes](07-kubernetes.md)
+**◀ Prev** [05 · Testing](05-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [07 · Replacing a model](07-evaluating-and-replacing-a-model.md)

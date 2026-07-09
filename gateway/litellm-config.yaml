@@ -77,6 +77,19 @@ model_list:
   # Routing note: if TWO stanzas share a model_name, LiteLLM load-balances
   # between them. Useful for a zero-downtime migration: add the self-hosted
   # entry, watch it take traffic, then remove the hosted one.
+  #
+  # ── Template: a CANDIDATE you're evaluating to replace an existing model ───
+  # Add it under a NEW name (not the one in use) so you can eval/soak it while
+  # users stay on the current model. See docs/07-evaluating-and-replacing-a-model.md.
+  # - model_name: coder-next            # temporary name; drop it after cutover
+  #   litellm_params:
+  #     model: openai/<candidate id from the build.nvidia.com model card>
+  #     api_base: https://integrate.api.nvidia.com/v1
+  #     api_key: os.environ/NVIDIA_API_KEY
+  #     input_cost_per_token: 0.00001   # set the candidate's real per-token price
+  #     output_cost_per_token: 0.00003  # so the cost axis of the comparison is honest
+  # When it clears the bar, give `coder` a second stanza pointing at the same
+  # backend (canary/load-balance), then remove the old one.
 
   # ── A note on pricing (the input_cost_per_token / output_cost_per_token above)
   # LiteLLM denominates budgets in dollars against a per-model price table. It

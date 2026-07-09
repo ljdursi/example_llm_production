@@ -145,7 +145,7 @@ Next, in whichever order need dictates:
 - more users / models → [02-the-gateway.md](02-the-gateway.md)
 - your own GPUs → [04-swapping-in-self-hosted-nim.md](04-swapping-in-self-hosted-nim.md)
 - wire into your Prometheus/Grafana → [06-monitoring.md](06-monitoring.md)
-- upgrades and a troubleshooting runbook → [09-operating.md](09-operating.md)
+- upgrades and a troubleshooting runbook → [10-operating.md](10-operating.md)
 - something to hand your users → [researcher-handout.md](researcher-handout.md)
 
 ---
