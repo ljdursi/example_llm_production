@@ -10,7 +10,7 @@ Move when at least one of these is true:
 - **You want the platform handling restarts, node failures, and rolling
   upgrades** instead of SSH-and-restart.
 - **Autoscaling is on the horizon** — it's k8s-native machinery
-  ([07-scaling-out.md](07-scaling-out.md) needs this phase first).
+  ([08-scaling-out.md](08-scaling-out.md) needs this phase first).
 - **Institutional convergence** — if your organization is building k8s
   operational muscle anyway, this service is a good tenant.
 
@@ -67,3 +67,7 @@ becomes your institution's managed Postgres); users still see one URL, and
 their keys survive untouched because they live in the database, not the
 deployment. Kubernetes changed *where things run*, not *what the service is* —
 if users noticed the migration, something went wrong.
+
+---
+
+**◀ Prev** [06 · Monitoring](06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [08 · Scaling out](08-scaling-out.md)

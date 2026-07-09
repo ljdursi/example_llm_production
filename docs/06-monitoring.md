@@ -76,7 +76,7 @@ nobody reads.
 Don't build a paging rotation for a service whose users will tolerate a
 morning outage. Sensible tiers:
 
-1. **Nightly smoke+eval in CI** ([04-testing](04-testing-performance-and-quality.md)) —
+1. **Nightly smoke+eval in CI** ([04-testing](05-testing-performance-and-quality.md)) —
    catches "quietly broken" within a day, costs nothing.
 2. **A few Alertmanager rules into your existing channels** (email/Slack):
    gateway `/health/liveliness` failing (blackbox exporter or your uptime
@@ -85,3 +85,7 @@ morning outage. Sensible tiers:
    (`litellm_proxy_failed_requests_metric_total`), DCGM thermal alerts.
 3. That's it, until this pilot graduates into something people's deadlines
    depend on — at which point revisit deliberately.
+
+---
+
+**◀ Prev** [05 · Testing](05-testing-performance-and-quality.md) · **[Up](../README.md)** · **Next ▶** [07 · Kubernetes](07-kubernetes.md)

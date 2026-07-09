@@ -37,14 +37,14 @@ editor config: none of it changes as you get more ambitious.
 | Phase | What changes | GPUs needed | Doc |
 |-------|-------------|-------------|-----|
 | **0. Gateway + hosted models** | Everything in this repo works, models are API calls to build.nvidia.com | none | [docs/01-getting-started.md](docs/01-getting-started.md) |
-| **1. First self-hosted model** | Swap one placeholder for a NIM container on a local GPU box | 1 box | [docs/03-swapping-in-self-hosted-nim.md](docs/03-swapping-in-self-hosted-nim.md) |
-| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/06-kubernetes.md](docs/06-kubernetes.md) |
-| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/07-scaling-out.md](docs/07-scaling-out.md) |
+| **1. First self-hosted model** | Swap one placeholder for a NIM container on a local GPU box | 1 box | [docs/04-swapping-in-self-hosted-nim.md](docs/04-swapping-in-self-hosted-nim.md) |
+| **2. Kubernetes** | Same components, k8s manifests (already mirrored in `k8s/`) | cluster | [docs/07-kubernetes.md](docs/07-kubernetes.md) |
+| **3. Scale-out serving** | NVIDIA Dynamo, KV-cache-aware routing, autoscaling | cluster | [docs/08-scaling-out.md](docs/08-scaling-out.md) |
 
 Testing (performance **and** quality) and monitoring are not phases — they are
 present from Phase 0 and grow with you. See
-[docs/04-testing-performance-and-quality.md](docs/04-testing-performance-and-quality.md)
-and [docs/05-monitoring.md](docs/05-monitoring.md).
+[docs/05-testing-performance-and-quality.md](docs/05-testing-performance-and-quality.md)
+and [docs/06-monitoring.md](docs/06-monitoring.md).
 
 ## Quick start (Phase 0, ~15 minutes)
 
@@ -94,6 +94,7 @@ so no choice is a lock-in:
 | Role | This repo uses | Alternatives (documented in each doc) |
 |------|----------------|--------------------------------------|
 | Gateway (auth, accounting, routing) | [LiteLLM Proxy](https://docs.litellm.ai) (open source; NVIDIA has no OSS gateway) | Envoy AI Gateway (CNCF ecosystem, v1.0 GA), Kong AI Gateway, Apache APISIX |
+| Guardrails (PII, safety) | [Presidio](https://microsoft.github.io/presidio/) PII masking, LiteLLM-native (no extra LLM calls) | [LLM Guard](https://llm-guard.com) (self-contained), [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails) (NVIDIA OSS; topical/jailbreak rails, adds LLM calls) |
 | Model serving | NVIDIA NIM containers | vLLM, SGLang, llama.cpp — anything OpenAI-compatible slots in identically |
 | Scale-out serving | [NVIDIA Dynamo](https://github.com/ai-dynamo/dynamo) (open source) | llm-d (CNCF Sandbox), vLLM production stack |
 | Perf testing | [AIPerf](https://github.com/ai-dynamo/aiperf) (NVIDIA OSS; successor to genai-perf) | k6, Locust, vLLM benchmark scripts |
@@ -106,5 +107,6 @@ so no choice is a lock-in:
 1. [docs/00-architecture.md](docs/00-architecture.md) — why a gateway, why these pieces
 2. [docs/01-getting-started.md](docs/01-getting-started.md) — get Phase 0 running
 3. [docs/02-the-gateway.md](docs/02-the-gateway.md) — keys, budgets, accounting, adding models
-4. [docs/08-operating.md](docs/08-operating.md) — upgrades and the runbook: read before real users arrive
-5. Everything else as you need it.
+4. [docs/03-guardrails.md](docs/03-guardrails.md) — keep PII/secrets out of prompts; pick your rails
+5. [docs/09-operating.md](docs/09-operating.md) — upgrades and the runbook: read before real users arrive
+6. Everything else as you need it.

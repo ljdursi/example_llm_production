@@ -143,7 +143,11 @@ are all still someone else's problem while your team learns the service layer.
 Next, in whichever order need dictates:
 
 - more users / models → [02-the-gateway.md](02-the-gateway.md)
-- your own GPUs → [03-swapping-in-self-hosted-nim.md](03-swapping-in-self-hosted-nim.md)
-- wire into your Prometheus/Grafana → [05-monitoring.md](05-monitoring.md)
-- upgrades and a troubleshooting runbook → [08-operating.md](08-operating.md)
+- your own GPUs → [04-swapping-in-self-hosted-nim.md](04-swapping-in-self-hosted-nim.md)
+- wire into your Prometheus/Grafana → [06-monitoring.md](06-monitoring.md)
+- upgrades and a troubleshooting runbook → [09-operating.md](09-operating.md)
 - something to hand your users → [researcher-handout.md](researcher-handout.md)
+
+---
+
+**◀ Prev** [00 · Architecture](00-architecture.md) · **[Up](../README.md)** · **Next ▶** [02 · The gateway](02-the-gateway.md)

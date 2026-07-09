@@ -32,7 +32,7 @@ baseline discipline, and concurrency sweeps are covered in
 without baselines are trivia**; capture them before you need them, commit the
 CSVs, and always compare like-for-like parameters.
 
-Perf tests and monitoring ([05-monitoring.md](05-monitoring.md)) are two views
+Perf tests and monitoring ([06-monitoring.md](06-monitoring.md)) are two views
 of the same thing — run a concurrency sweep while watching the Grafana
 dashboard and you'll see queue depth, KV-cache pressure, and GPU utilization
 *explain* the latency curve. Do this once as a team; it's the fastest serving
@@ -59,3 +59,7 @@ live service, perf weekly with results committed. A nightly smoke+eval run is
 also your cheapest availability monitor: it fails loudly the morning after
 something quietly broke — an entirely appropriate alerting story for a
 three-nines academic service.
+
+---
+
+**◀ Prev** [04 · Self-hosted NIM](04-swapping-in-self-hosted-nim.md) · **[Up](../README.md)** · **Next ▶** [06 · Monitoring](06-monitoring.md)

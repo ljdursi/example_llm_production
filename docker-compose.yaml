@@ -3,7 +3,7 @@
 #   make up            → gateway, db, chat UI
 #   make monitoring    → also start a local Prometheus + Grafana
 #                        (skip if you'll scrape from your existing Prometheus —
-#                         see docs/05-monitoring.md)
+#                         see docs/06-monitoring.md)
 #
 # The models themselves are NOT here yet: in Phase 0 they are hosted endpoints
 # at build.nvidia.com, configured in gateway/litellm-config.yaml. Phase 1 adds
@@ -19,7 +19,7 @@ services:
   # Image tags in this stack are PINNED, deliberately: the gateway holds every
   # user key, so upgrades should be decisions, not surprises. (LiteLLM had a
   # supply-chain incident and a critical auth-bypass CVE in early 2026 — pin a
-  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/08-operating.md.)
+  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/09-operating.md.)
   gateway:
     image: ghcr.io/berriai/litellm:v1.83.14-stable
     depends_on:

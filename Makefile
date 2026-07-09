@@ -6,7 +6,7 @@ GATEWAY_URL  ?= http://localhost:4000
 -include .env
 export
 
-.PHONY: help up down logs tls monitoring selfhost create-key smoke perf eval
+.PHONY: help up down logs tls monitoring guardrails selfhost create-key smoke perf eval
 
 help:  ## show this help
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -28,7 +28,12 @@ logs:  ## follow gateway logs
 monitoring:  ## also start local Prometheus (:9090) + Grafana (:3000)
 	$(COMPOSE) --profile monitoring up -d
 
-selfhost:  ## Phase 1: also start the self-hosted NIM (see docs/03)
+guardrails:  ## also start Presidio PII sidecars (then enable them in the config — see docs/03)
+	$(COMPOSE) -f docker-compose.yaml -f docker-compose.guardrails.yaml up -d --wait
+	@echo "Presidio running. Enable it: uncomment the guardrails block in"
+	@echo "gateway/litellm-config.yaml, then: docker compose restart gateway"
+
+selfhost:  ## Phase 1: also start the self-hosted NIM (see docs/04)
 	$(COMPOSE) -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d
 
 create-key:  ## mint a user API key: make create-key USER_ID=alice BUDGET=20

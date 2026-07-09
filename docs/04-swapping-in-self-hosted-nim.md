@@ -84,7 +84,7 @@ make perf MODEL=coder      # compare to step 1: TTFT likely improves (no WAN);
 Wire up monitoring while the perf run is generating load: the NIM's `/metrics`
 is already listed in `monitoring/prometheus/prometheus.yml`, and the Grafana
 overview dashboard should show queue depth, TTFT, and (with dcgm-exporter
-running) GPU utilization moving. Details: [05-monitoring.md](05-monitoring.md).
+running) GPU utilization moving. Details: [06-monitoring.md](06-monitoring.md).
 
 Users noticed nothing. Their key, URL, and model name are unchanged.
 
@@ -101,4 +101,8 @@ Users noticed nothing. Their key, URL, and model name are unchanged.
   parts in messages) — another stanza, another container, no new architecture.
 
 When one box / one replica stops being enough:
-[06-kubernetes.md](06-kubernetes.md), then [07-scaling-out.md](07-scaling-out.md).
+[07-kubernetes.md](07-kubernetes.md), then [08-scaling-out.md](08-scaling-out.md).
+
+---
+
+**◀ Prev** [03 · Guardrails](03-guardrails.md) · **[Up](../README.md)** · **Next ▶** [05 · Testing](05-testing-performance-and-quality.md)

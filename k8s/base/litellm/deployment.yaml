@@ -18,7 +18,7 @@ spec:
         - name: litellm
           # Pinned deliberately (keep in sync with docker-compose.yaml): the
           # gateway holds every user key — upgrade on purpose, ≥ v1.83.7.
-          # See docs/08-operating.md.
+          # See docs/09-operating.md.
           image: ghcr.io/berriai/litellm:v1.83.14-stable
           args: ["--config", "/app/config.yaml", "--port", "4000"]
           ports:

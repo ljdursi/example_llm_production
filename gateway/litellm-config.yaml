@@ -7,7 +7,7 @@
 #
 # Phase 0 (now):   every model is a hosted endpoint at build.nvidia.com.
 # Phase 1:         change api_base to your own NIM container. That's the
-#                  whole migration. See docs/03-swapping-in-self-hosted-nim.md.
+#                  whole migration. See docs/04-swapping-in-self-hosted-nim.md.
 #
 # Browse available hosted models at https://build.nvidia.com — every model
 # card shows its exact id (the string after "openai/" below). Model ids date
@@ -36,7 +36,7 @@ model_list:
       # NIM (Phase 1), so the same name survives the self-hosting cutover. Note
       # it's a 47B-param MoE: self-hosting needs ~2× A100/H100-class GPUs — to
       # test the Phase 1 *pattern* on smaller hardware, temporarily point this
-      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/03.
+      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/04.
       model: openai/mistralai/mixtral-8x7b-instruct-v0.1
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
@@ -101,8 +101,37 @@ litellm_settings:
   callbacks: ["prometheus"]  # gateway metrics on /metrics (open source since
                              # LiteLLM v1.80.0): request rates and token counts
                              # per model/key. Postgres (/spend) remains the
-                             # billing-grade usage record — see docs/05-monitoring.md.
+                             # billing-grade usage record — see docs/06-monitoring.md.
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY   # admin credential — mint user keys with it
   database_url: os.environ/DATABASE_URL       # persistence for keys/users/spend
+
+# ── Guardrails (OFF by default) — see docs/03-guardrails.md ───────────────────
+# Presidio is a FIRST-CLASS LiteLLM guardrail: it detects/masks PII and PHI with
+# NER + pattern recognizers and makes NO extra LLM inference calls (unlike NeMo
+# Guardrails' self-check flows). It runs as two sidecars, started by the opt-in
+# overlay:
+#   make guardrails      (docker-compose.guardrails.yaml — sets the two env vars
+#                         PRESIDIO_ANALYZER_API_BASE / PRESIDIO_ANONYMIZER_API_BASE)
+# Starting the sidecars does nothing until you UNCOMMENT this block and reload:
+#   docker compose restart gateway
+#
+# guardrails:
+#   - guardrail_name: "presidio-pii"
+#     litellm_params:
+#       guardrail: presidio
+#       mode: "pre_call"                 # scan the request BEFORE it hits a model.
+#                                        # "post_call" also scrubs the response;
+#                                        # "logging_only" masks only what's logged.
+#       pii_entities_config:
+#         CREDIT_CARD:   "MASK"          # → "<CREDIT_CARD>" in the forwarded prompt
+#         EMAIL_ADDRESS: "MASK"
+#         US_SSN:        "BLOCK"         # reject the request outright if seen
+#       # presidio_score_thresholds:     # optional: only act above a confidence
+#       #   ALL: 0.7
+#     # default_on: true                 # apply to every request; omit to attach
+#                                        # per-key via metadata (see docs/03).
+#
+# Stick to the OpenAI-compatible path (this gateway) for output masking — there's
+# a known bug in output un-masking on the Anthropic-native /v1/messages path.
