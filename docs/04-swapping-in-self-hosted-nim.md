@@ -99,6 +99,9 @@ Users noticed nothing. Their key, URL, and model name are unchanged.
   one model name.
 - **Multi-modal later**: vision NIMs speak the same chat API (image content
   parts in messages) — another stanza, another container, no new architecture.
+- **A fine-tune of what you serve**: NIM serves LoRA adapters over one base
+  deployment, so comparing a researcher's fine-tune against the base is a file
+  copy and a stanza, not a second model — [07b-comparing-fine-tunes-with-lora.md](07b-comparing-fine-tunes-with-lora.md).
 
 When one box / one replica stops being enough:
 [08-kubernetes.md](08-kubernetes.md), then [09-scaling-out.md](09-scaling-out.md).

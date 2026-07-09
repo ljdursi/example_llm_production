@@ -70,4 +70,4 @@ if users noticed the migration, something went wrong.
 
 ---
 
-**◀ Prev** [07 · Replacing a model](07-evaluating-and-replacing-a-model.md) · **[Up](../README.md)** · **Next ▶** [09 · Scaling out](09-scaling-out.md)
+**◀ Prev** [07b · Comparing fine-tunes (LoRA)](07b-comparing-fine-tunes-with-lora.md) · **[Up](../README.md)** · **Next ▶** [09 · Scaling out](09-scaling-out.md)

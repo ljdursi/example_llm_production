@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 artifacts/
 tests/perf/results/
+loras/
 .venv*/
 .claude/
 /PLAN-*.md

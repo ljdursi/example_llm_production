@@ -54,6 +54,13 @@ present from Phase 0 and grow with you. See
 [docs/05-testing-performance-and-quality.md](docs/05-testing-performance-and-quality.md)
 and [docs/06-monitoring.md](docs/06-monitoring.md).
 
+Neither is **changing what's behind a model name** — a lifecycle activity, not a
+phase. Evaluating and replacing a model
+([docs/07](docs/07-evaluating-and-replacing-a-model.md)), and its worked GPU
+example of comparing a **LoRA fine-tune** against the model you already serve
+([docs/07b](docs/07b-comparing-fine-tunes-with-lora.md)), reuse the same eval and
+monitoring you built above.
+
 ## Quick start (Phase 0, ~15 minutes)
 
 Prerequisites: Docker with the compose plugin; `make` and Python ≥3.9 with
