@@ -6,7 +6,7 @@ GATEWAY_URL  ?= http://localhost:4000
 -include .env
 export
 
-.PHONY: help up down logs tls monitoring guardrails selfhost create-key smoke perf eval
+.PHONY: help up down logs tls monitoring guardrails selfhost lora create-key smoke perf eval
 
 help:  ## show this help
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -33,8 +33,11 @@ guardrails:  ## also start Presidio PII sidecars (then enable them in the config
 	@echo "Presidio running. Enable it: uncomment the guardrails block in"
 	@echo "gateway/litellm-config.yaml, then: docker compose restart gateway"
 
-selfhost:  ## Phase 1: also start the self-hosted NIM (see docs/01-01)
+selfhost:  ## Phase 1: also start the self-hosted NIM + GPU metrics (see docs/01-01)
 	$(COMPOSE) -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d
+
+lora:  ## Phase 1 LoRA: start the Llama-3.1-8B multi-LoRA NIM (see docs/01-03)
+	$(COMPOSE) -f docker-compose.yaml -f docker-compose.selfhost.yaml --profile lora up -d nim-general
 
 create-key:  ## mint a user API key: make create-key USER_ID=alice BUDGET=20
 	@test -n "$(USER_ID)" || { echo "usage: make create-key USER_ID=alice [BUDGET=20]"; exit 1; }

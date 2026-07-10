@@ -28,7 +28,7 @@ OSL="${OSL:-256}"                      # output sequence length (tokens)
 # unknown-tokenizer error. Pass one explicitly. gpt2 is a small, ungated
 # default that lets the run work anywhere; for accurate input-token counts set
 # TOKENIZER to the HF repo of the model actually behind this name (e.g.
-# Qwen/Qwen2.5-Coder-32B-Instruct). Counting is approximate across tokenizers,
+# meta-llama/Llama-3.2-3B-Instruct). Counting is approximate across tokenizers,
 # which is fine here: these runs are for diffing against each other, and the
 # gateway/backend report the authoritative token counts in /spend.
 TOKENIZER="${TOKENIZER:-gpt2}"

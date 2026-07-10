@@ -7,6 +7,8 @@ resources:
   - postgres/service.yaml
   - litellm/deployment.yaml
   - litellm/service.yaml
+  - webui/deployment.yaml
+  - webui/service.yaml
 
 # The gateway's config is the SAME file the compose stack uses — one source of
 # truth for model routing on both tracks. kustomize won't load files from

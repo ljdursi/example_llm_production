@@ -36,8 +36,10 @@ spec:
         - name: nim
           # Pin the tag (a `1.x.y` from the container's NGC catalog page)
           # before relying on this — keep in sync with
-          # docker-compose.selfhost.yaml; see the note there.
-          image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
+          # docker-compose.selfhost.yaml; see the note there. This is the SAME
+          # model `coder` serves in Phase 0 (hosted meta/llama-3.2-3b-instruct),
+          # so the swap changes the backend, not the model.
+          image: nvcr.io/nim/meta/llama-3.2-3b-instruct:latest
           ports:
             - containerPort: 8000
           env:
@@ -45,11 +47,11 @@ spec:
               valueFrom: { secretKeyRef: { name: llm-secrets, key: NGC_API_KEY } }
           resources:
             limits:
-              nvidia.com/gpu: 2        # size to the model card's recommendation
-              memory: 64Gi
+              nvidia.com/gpu: 1        # a 3B fits one GPU; size to the model card
+              memory: 16Gi
             requests:
               cpu: "4"
-              memory: 32Gi
+              memory: 8Gi
           volumeMounts:
             - name: model-cache
               mountPath: /opt/nim/.cache
@@ -78,7 +80,7 @@ spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
-      storage: 200Gi   # model weights + built engines; size generously
+      storage: 60Gi    # model weights + built engines; size generously (a 3B is small)
 ---
 # The gateway routes to this name: http://nim-coder.llm-service:8000/v1
 # (that's the api_base to put in gateway/litellm-config.yaml on this track).

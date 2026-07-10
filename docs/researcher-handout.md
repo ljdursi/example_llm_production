@@ -6,7 +6,7 @@ page; everything else is your problem, which is the service's whole point.)*
 
 ## What you get
 
-- **Chat in the browser:** [https://llm.YOUR.EDU:8080] — sign in and pick a
+- **Chat in the browser:** [https://chat.llm.YOUR.EDU] — sign in and pick a
   model from the dropdown.
 - **An API key** for use from code, notebooks, and IDE assistants, sent to
   you when you're onboarded. Treat it like a password: it's yours alone, it's

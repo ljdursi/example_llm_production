@@ -52,11 +52,16 @@ Exact names drift a little between NIM/vLLM versions — `curl :8000/metrics`
 against *your* backend once and adjust the dashboard; ten minutes well spent.
 
 **3. Hardware — are the GPUs healthy and earning their keep?**
-Run NVIDIA's [dcgm-exporter](https://github.com/NVIDIA/dcgm-exporter) on every
-GPU node (one `docker run`, or the GPU Operator deploys it on k8s):
-utilization, VRAM, temperature, power. Utilization data is also your honest
-answer to "do we need more GPUs?" — and, just as valuable in academia, to "are
-the ones we have justified?"
+NVIDIA's [dcgm-exporter](https://github.com/NVIDIA/dcgm-exporter) gives you
+utilization, VRAM, temperature, and power. It ships as the `dcgm-exporter`
+service in `docker-compose.selfhost.yaml` (starts with `make selfhost`, since
+GPU metrics only exist once you self-host); on Kubernetes the GPU Operator runs
+it as a DaemonSet. The compose service mounts a small non-profiling counter set
+(`monitoring/dcgm/counters.csv`) so the GPU panels populate even on virtualized
+/ cloud GPU hosts — on bare metal, drop that mount for NVIDIA's fuller defaults
+(the file explains both). Utilization data is also your honest answer to "do we
+need more GPUs?" — and, just as valuable in academia, to "are the ones we have
+justified?"
 
 **4. Usage accounting — who used what, exactly?**
 This lives in the **gateway's Postgres**, queried via `/spend` APIs

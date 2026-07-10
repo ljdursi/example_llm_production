@@ -79,8 +79,9 @@ loras/
 ```
 
 ```bash
+pip install huggingface_hub          # provides the `hf` CLI (the adapter repo is public — no HF token needed)
 mkdir -p loras/llama31-8b-greek-dialect
-huggingface-cli download Stergios/llama3.1-8b-instruct-lora \
+hf download Stergios/llama3.1-8b-instruct-lora \
   --local-dir loras/llama31-8b-greek-dialect
 
 # NIM's docs say to EXCLUDE tokenizer files from HF adapters — the base NIM's
@@ -105,11 +106,13 @@ you trust it — a bad `adapter_config.json` fails at load with the unhelpful
 
 ## 2. Serve the base with LoRA enabled
 
-Point a self-hosted NIM at the **Llama-3.1-8B base** (not the qwen coder NIM
-from doc 04 — the adapter's base must match) and turn on PEFT. There's a
-commented `nim-general` service in
-[`docker-compose.selfhost.yaml`](../docker-compose.selfhost.yaml) with exactly
-this wiring; the two lines that matter:
+Point a self-hosted NIM at the **Llama-3.1-8B base** (not the Llama-3.2-3B coder
+NIM from doc 01-01 — the adapter's base must match exactly, and 3.2-3B ≠ 3.1-8B)
+and turn on PEFT. The
+`nim-general` service in
+[`docker-compose.selfhost.yaml`](../docker-compose.selfhost.yaml) already has
+exactly this wiring (behind the `lora` compose profile, so it doesn't start with
+`make selfhost`); the two lines that matter:
 
 ```yaml
     environment:
@@ -128,7 +131,7 @@ Bring it up and confirm the adapter is registered — it appears at `/v1/models`
 **alongside** the base, as a peer model id:
 
 ```bash
-docker compose -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d nim-general
+make lora     # = docker compose -f docker-compose.yaml -f docker-compose.selfhost.yaml --profile lora up -d nim-general
 curl -s http://localhost:8000/v1/models | python3 -m json.tool
 #   → "meta/llama-3.1-8b-instruct"   (base)
 #   → "llama31-8b-greek-dialect"     (adapter — selectable by name)
@@ -207,14 +210,18 @@ cheap trust insurance.
 
 - **Base must match the adapter.** The NIM's base model has to be the one the
   adapter was trained on. Mixed dims fail at load. (This is why the example uses
-  a dedicated `nim-general` Llama-3.1-8B NIM, not doc 04's qwen coder.)
+  a dedicated `nim-general` Llama-3.1-8B NIM, not doc 01-01's Llama-3.2-3B coder.)
 - **Multi-LoRA is model-specific.** NIM supports it for a set of bases —
   Llama-3-8B/70B and Llama-3.1-8B among them; check the model's NIM docs before
   assuming. It is **not** the same list as "models that have a NIM."
-- **Backend/GPU gotcha.** On some GPU + backend combinations LoRA isn't
-  supported (e.g. Llama-3.1-8B LoRA on an L40S under the TRT-LLM backend). If
-  the base loads but adapters won't, check the NIM's support matrix / try the
-  vLLM backend before assuming a bad adapter.
+- **Backend/GPU gotcha.** LoRA support depends on the NIM's inference backend.
+  On many GPUs the NIM auto-selects the **vLLM** backend, which serves multi-LoRA
+  fine (verified: this exact Llama-3.1-8B NIM on an L40S came up on vLLM with an
+  FP8 profile and loaded the adapter with no extra config). The **TRT-LLM**
+  backend is the one with LoRA gaps on some GPU/model combinations. So if the
+  base loads but adapters won't, check which backend you got and pin the vLLM one
+  (`NIM_BACKEND=vllm` / the model's documented backend env) before assuming a bad
+  adapter.
 - **Rank budget.** NIM pre-allocates GPU cache to `NIM_MAX_LORA_RANK`; raising
   it to host a high-rank adapter costs memory for *every* slot. Most adapters
   are rank 8–32.

@@ -33,11 +33,12 @@ model_list:
   - model_name: coder
     litellm_params:
       # Chosen to exist BOTH as a hosted endpoint (Phase 0) and a downloadable
-      # NIM (Phase 1), so the same name survives the self-hosting cutover. Note
-      # it's a 47B-param MoE: self-hosting needs ~2× A100/H100-class GPUs — to
-      # test the Phase 1 *pattern* on smaller hardware, temporarily point this
-      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/01-01.
-      model: openai/mistralai/mixtral-8x7b-instruct-v0.1
+      # NIM (Phase 1) AND to be small (a 3B), so the SAME name survives the
+      # self-hosting cutover and Phase 1 is genuinely testable on one modest GPU
+      # (~8-10 GB) — no multi-GPU box required. When you want a stronger coder,
+      # this is exactly the swap docs/01-02 walks through: eval a bigger model
+      # under a new name, then repoint this one.
+      model: openai/meta/llama-3.2-3b-instruct
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
       # Per-token prices — see the "A note on pricing" block below. These are
@@ -70,7 +71,7 @@ model_list:
   # Replace (or duplicate — see routing note below) a stanza with:
   # - model_name: coder
   #   litellm_params:
-  #     model: openai/mistralai/mixtral-8x7b-instruct-v0.1   # whatever your NIM actually serves
+  #     model: openai/meta/llama-3.2-3b-instruct   # whatever your NIM actually serves
   #     api_base: http://nim-coder:8000/v1   # your NIM container / k8s Service
   #     api_key: none                        # self-hosted NIM does no auth; the gateway is the auth layer
   #
