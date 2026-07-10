@@ -206,6 +206,34 @@ And the doc 01-02 courtesy to users applies with a LoRA twist: a fine-tune can s
 holds. If researchers depend on the old behavior, a one-line changelog entry is
 cheap trust insurance.
 
+## On Kubernetes (Phase 2)
+
+Everything above is the compose track. The Phase-2 counterpart is
+[`k8s/nim-lora/`](../k8s/nim-lora/) — a `nim-general` Deployment that mirrors the
+compose service: the same Llama-3.1-8B base with `NIM_PEFT_SOURCE` +
+`NIM_PEFT_REFRESH_INTERVAL`, an `ngc-registry` pull secret, and a GPU limit. Two
+things the cluster changes:
+
+- **Adapters live on a PVC** (`nim-general-loras`, mounted at `/opt/nim/loras`),
+  not a host bind mount. An init container populates it with the example adapter
+  on first boot (the `hf download` + tokenizer-cleanup from step 1, idempotent);
+  for your own adapter, edit that init container's repo id or `kubectl cp` the
+  adapter onto the PVC — NIM rescans within the refresh interval, no restart.
+- **It's a separate overlay**, so the default `kubectl apply -k k8s/nim/` (the
+  coder NIM) is untouched:
+
+  ```bash
+  kubectl apply -k k8s/nim-lora/                       # base + adapter on one GPU pod
+  kubectl -n llm-service rollout status deploy/nim-general   # wait for it
+  ```
+
+The gateway side is identical to the compose walkthrough — add the `general`
+(base) and `general-lora` (adapter) stanzas, with `api_base` pointing at the
+in-cluster Service `http://nim-general.llm-service:8000/v1`, to the
+`litellm-config` ConfigMap, then roll the gateway
+(`kubectl -n llm-service rollout restart deploy/litellm`). The same
+base-vs-adapter comparison and eval run unchanged.
+
 ## Caveats worth knowing before you rely on this
 
 - **Base must match the adapter.** The NIM's base model has to be the one the

@@ -16,7 +16,7 @@ metadata:
 spec:
   selector:
     matchExpressions:
-      - { key: app, operator: In, values: [nim-coder] }  # add each new backend here
+      - { key: app, operator: In, values: [nim-coder, nim-general] }  # add each new backend here
   endpoints:
     - port: http
       path: /metrics

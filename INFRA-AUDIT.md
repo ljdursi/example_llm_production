@@ -51,7 +51,7 @@ to end users, not a build/learning doc, so it carries no objective/infra block.
 - ✅ **`nim-general` is a real service** in `docker-compose.selfhost.yaml`, behind the `lora` compose profile (so `make selfhost` doesn't start it), launched by **`make lora`**. (Resolved Open item 2.)
 - ✅ `loras/README.md` is committed documenting the expected adapter layout; `.gitignore` keeps adapter contents out but tracks the README (`loras/*` + `!loras/README.md`). (Resolved Open item 2.)
 - ✅ **Walkthrough ran end to end on the L40S box** (see Live verification): base `general` vs `general-lora` showed the documented Pontic-dialect delta; regression probe held. Two doc fixes applied — `huggingface-cli download` → `hf download` + a `pip install huggingface_hub` prereq (the CLI wasn't installed and wasn't listed), and the backend caveat updated (the NIM auto-selected the vLLM backend on the L40S and LoRA worked; the TRT-LLM gap is the real caveat). → **Open item 7**.
-- ⚠️ **No k8s LoRA manifest yet** — the walkthrough is compose-only; `k8s/nim/` has just `nim-coder`, no `nim-general`/PEFT equivalent. **Decided to build it out on the k8s track** (multi-LoRA NIM + `loras/` via PVC/hostPath + doc pointer). → **Open item 7** (planned).
+- ✅ **LoRA now works on the k8s track too** — `k8s/nim-lora/` (a `nim-general` multi-LoRA NIM + adapter PVC populated by an init container, separate overlay), `k8s/README.md` translation-table row, ServiceMonitor selector updated, and an "On Kubernetes" section in 01-03. Verified live on MicroK8s (see Live verification). (Resolved Open item 7.)
 
 ### 02-01 kubernetes
 - ✅ `k8s/base/` (litellm, postgres, namespace, **webui**), `k8s/nim/`, `k8s/monitoring/servicemonitor.yaml`, `k8s/README.md` (secret + deploy commands, translation table).
@@ -99,22 +99,21 @@ to end users, not a build/learning doc, so it carries no objective/infra block.
    end without a multi-GPU box. (A bigger/stronger coder is then a `docs/01-02`
    evaluate-and-replace exercise, not a prerequisite.)
 
-7. **LoRA walkthrough (01-03) — flagged during live run.** Two doc fixes were
-   applied inline (`hf download` + `pip install huggingface_hub` prereq; backend
-   caveat corrected — the NIM defaults to vLLM on L40S and LoRA works, so the
-   TRT-LLM warning was overstated). **Decided: build out LoRA on the k8s track
-   too** (not compose-only). Planned work:
-   - Add `k8s/nim/nim-general.yaml` — a multi-LoRA NIM (Llama-3.1-8B base) mirroring
-     the compose `nim-general`: `NIM_PEFT_SOURCE=/opt/nim/loras`,
-     `NIM_PEFT_REFRESH_INTERVAL`, `imagePullSecrets: ngc-registry`, GPU limit, and
-     the `loras/` adapter tree mounted via a PVC or hostPath (decide how adapters
-     land on the cluster — PVC + a copy job, or a hostPath on the GPU node).
-   - Wire it in (its own `k8s/nim/kustomization.yaml` entry or a separate overlay so
-     it isn't pulled by the default `coder` NIM apply), and add the base +
-     `-lora` gateway stanzas pointing at the in-cluster `nim-general` Service.
-   - Update `k8s/README.md`'s translation table and add a short "LoRA on k8s"
-     pointer from 01-03 (and/or 02-01) so the Phase-2 reader isn't left without it.
-   - Verify on the MicroK8s box the same way the compose path was verified here.
+7. ✅ **RESOLVED — LoRA on the k8s track.** Two doc fixes were applied inline
+   during the compose run (`hf download` + `pip install huggingface_hub` prereq;
+   backend caveat corrected — the NIM defaults to vLLM on L40S and LoRA works, so
+   the TRT-LLM warning was overstated). Then LoRA was built out on Kubernetes:
+   - `k8s/nim-lora/` — a `nim-general` multi-LoRA NIM (Llama-3.1-8B) mirroring the
+     compose service: `NIM_PEFT_SOURCE`, `NIM_PEFT_REFRESH_INTERVAL`,
+     `imagePullSecrets: ngc-registry`, GPU limit; the adapter tree lives on a PVC
+     (`nim-general-loras`) populated by an idempotent init container that runs the
+     doc's `hf download` + tokenizer-cleanup. **Separate overlay** so the default
+     `kubectl apply -k k8s/nim/` (coder) is untouched.
+   - `k8s/README.md` translation-table row added; `k8s/monitoring/servicemonitor.yaml`
+     selector now includes `nim-general`; 01-03 gained an "On Kubernetes" section.
+   - Verified live on MicroK8s (see Live verification): adapter registered at
+     `/v1/models`, base vs `general-lora` showed the Pontic-dialect delta, and the
+     regression probe held — all through the in-cluster gateway.
 
 ---
 
@@ -153,6 +152,13 @@ Beyond parsing/kustomize checks, the phases were exercised end to end:
   removal it registered at `/v1/models` alongside the base. Base `general` vs
   `general-lora` showed the documented Pontic-dialect delta, and the boiling-point
   regression probe held on both. Doc fixes applied (see 01-03 coverage).
+- **LoRA on Kubernetes (`k8s/nim-lora/`)** — the same walkthrough on MicroK8s:
+  `kubectl apply -k k8s/nim-lora/` scheduled the `nim-general` multi-LoRA NIM onto
+  a node GPU; the init container populated the adapter PVC (`hf download` +
+  cleanup, exit 0); the adapter registered at `/v1/models` alongside the base;
+  after adding the `general`/`general-lora` stanzas to the ConfigMap and rolling
+  the gateway, the base-vs-adapter Pontic-dialect delta reproduced and the
+  regression probe held — all through the in-cluster gateway.
 
 The NIM/GPU parts need NGC access + a GPU-scheduling cluster; both were exercised
 here (the base stack needs neither).
