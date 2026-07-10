@@ -3,7 +3,7 @@
 #   make up            → gateway, db, chat UI
 #   make monitoring    → also start a local Prometheus + Grafana
 #                        (skip if you'll scrape from your existing Prometheus —
-#                         see docs/06-monitoring.md)
+#                         see docs/00-06-monitoring.md)
 #
 # The models themselves are NOT here yet: in Phase 0 they are hosted endpoints
 # at build.nvidia.com, configured in gateway/litellm-config.yaml. Phase 1 adds
@@ -19,7 +19,7 @@ services:
   # Image tags in this stack are PINNED, deliberately: the gateway holds every
   # user key, so upgrades should be decisions, not surprises. (LiteLLM had a
   # supply-chain incident and a critical auth-bypass CVE in early 2026 — pin a
-  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/10-operating.md.)
+  # `vX.Y.Z-stable` tag ≥ v1.83.7 and upgrade on purpose; see docs/00-07-operating.md.)
   gateway:
     image: ghcr.io/berriai/litellm:v1.83.14-stable
     depends_on:
@@ -28,7 +28,7 @@ services:
     ports:
       # Bound to all interfaces for first-contact convenience. Before handing
       # keys to users on OTHER machines, start the TLS front door (`make tls`,
-      # see the caddy service below and docs/01 step 5) and change this to
+      # see the caddy service below and docs/00-02 step 5) and change this to
       # "127.0.0.1:4000:4000" — and webui's to "127.0.0.1:8080:8080" — so the
       # only way in from the network is through TLS.
       - "4000:4000"
@@ -96,7 +96,7 @@ services:
   # gateway/webui ports above to 127.0.0.1 so TLS is the only network path.
   # If your institution fronts services with its own proxy/load balancer, use
   # that instead and skip this service — anything terminating TLS in front of
-  # :4000 is equivalent. See docs/01-getting-started.md step 5.
+  # :4000 is equivalent. See docs/00-02-getting-started.md step 5.
   caddy:
     image: caddy:2.10.2
     profiles: ["tls"]

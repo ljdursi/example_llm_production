@@ -1,5 +1,16 @@
 # Phase 3: scale-out serving — Dynamo, KV-aware routing, autoscaling
 
+> **Learning objective.** Read the monitoring signals that justify scaling, add
+> replicas, then adopt NVIDIA Dynamo (KV-aware routing, disaggregated
+> prefill/decode) and queue-depth-driven autoscaling — each arriving as one more
+> gateway backend, proven with AIPerf sweeps.
+>
+> **Infrastructure** · *Phase 3 — scale-out*. Builds on the [`k8s/`](../k8s)
+> track (`kubectl scale`, then Dynamo via its own operator/Helm — **not shipped
+> in this repo**; see the audit) · Dynamo enters as one more `api_base` in
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) · proven with
+> [`tests/perf/`](../tests/perf) against the [`monitoring/`](../monitoring) signals.
+
 This is the ambitious end of the roadmap. Nothing here should be built until
 monitoring says so — which is the payoff of having built monitoring first.
 The signals, in escalating order:
@@ -98,4 +109,4 @@ transitional state; for an academic service it's often the steady state.
 
 ---
 
-**◀ Prev** [08 · Kubernetes](08-kubernetes.md) · **[Up](../README.md)** · **Next ▶** [10 · Operating](10-operating.md)
+**◀ Prev** [02-01 · Kubernetes](02-01-kubernetes.md) · **[Up](../README.md)** · **Next ▶** [Researcher handout](researcher-handout.md)

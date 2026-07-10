@@ -67,4 +67,4 @@ roughly when, and the error message. Never include your API key.
 
 ---
 
-**◀ Prev** [10 · Operating](10-operating.md) · **[Up](../README.md)**
+**◀ Prev** [03-01 · Scaling out](03-01-scaling-out.md) · **[Up](../README.md)**

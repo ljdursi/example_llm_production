@@ -1,5 +1,17 @@
 # Phase 2: Kubernetes
 
+> **Learning objective.** Move the same stack to Kubernetes without changing the
+> service: deploy gateway + db + NIM from the mirrored manifests that share the
+> one gateway config, stand up the GPU Operator, and re-run the suites against the
+> new URL as the migration's acceptance test.
+>
+> **Infrastructure** · *Phase 2 — Kubernetes*.
+> [`k8s/base/`](../k8s/base) (litellm · postgres · namespace) ·
+> [`k8s/nim/`](../k8s/nim) ·
+> [`k8s/monitoring/servicemonitor.yaml`](../k8s/monitoring/servicemonitor.yaml) ·
+> [`k8s/README.md`](../k8s/README.md) · the shared
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml).
+
 ## When (and whether)
 
 Compose on one box is a legitimate way to run this service for a long time.
@@ -10,7 +22,7 @@ Move when at least one of these is true:
 - **You want the platform handling restarts, node failures, and rolling
   upgrades** instead of SSH-and-restart.
 - **Autoscaling is on the horizon** — it's k8s-native machinery
-  ([09-scaling-out.md](09-scaling-out.md) needs this phase first).
+  ([03-01-scaling-out.md](03-01-scaling-out.md) needs this phase first).
 - **Institutional convergence** — if your organization is building k8s
   operational muscle anyway, this service is a good tenant.
 
@@ -70,4 +82,4 @@ if users noticed the migration, something went wrong.
 
 ---
 
-**◀ Prev** [07b · Comparing fine-tunes (LoRA)](07b-comparing-fine-tunes-with-lora.md) · **[Up](../README.md)** · **Next ▶** [09 · Scaling out](09-scaling-out.md)
+**◀ Prev** [01-03 · Comparing fine-tunes (LoRA)](01-03-comparing-fine-tunes-with-lora.md) · **[Up](../README.md)** · **Next ▶** [03-01 · Scaling out](03-01-scaling-out.md)

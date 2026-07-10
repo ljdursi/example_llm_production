@@ -1,5 +1,13 @@
 # Architecture: why these pieces
 
+> **Learning objective.** Explain why users talk to a gateway rather than a model
+> server, map each component to the constraint that justifies it, and name what
+> the pilot deliberately leaves out (and why).
+>
+> **Infrastructure** · *conceptual — defines none of its own*. Every component
+> named here is stood up starting in [`00-02-getting-started`](00-02-getting-started.md);
+> the component table below indexes the phase each first appears in.
+
 ## The problem shape
 
 You're standing up shared LLM inference for researchers, as a pilot for a
@@ -51,7 +59,7 @@ open-source gateway, so this is the one non-NVIDIA choice at the core of the
 stack. The interface it presents (OpenAI API + virtual keys) is a de facto
 standard, so replacing it later with **Envoy AI Gateway** (CNCF, Envoy-based,
 Kubernetes-native) or **Kong AI Gateway** / **Apache APISIX** is realistic;
-see [02-the-gateway.md](02-the-gateway.md).
+see [00-03-the-gateway.md](00-03-the-gateway.md).
 
 ## The component map
 
@@ -89,4 +97,4 @@ Naming what's absent is as instructive as what's present:
 
 ---
 
-**[Up: README](../README.md)** · **Next ▶** [01 · Getting started](01-getting-started.md)
+**[Up: README](../README.md)** · **Next ▶** [00-02 · Getting started](00-02-getting-started.md)

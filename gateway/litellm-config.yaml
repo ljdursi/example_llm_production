@@ -7,7 +7,7 @@
 #
 # Phase 0 (now):   every model is a hosted endpoint at build.nvidia.com.
 # Phase 1:         change api_base to your own NIM container. That's the
-#                  whole migration. See docs/04-swapping-in-self-hosted-nim.md.
+#                  whole migration. See docs/01-01-swapping-in-self-hosted-nim.md.
 #
 # Browse available hosted models at https://build.nvidia.com — every model
 # card shows its exact id (the string after "openai/" below). Model ids date
@@ -36,7 +36,7 @@ model_list:
       # NIM (Phase 1), so the same name survives the self-hosting cutover. Note
       # it's a 47B-param MoE: self-hosting needs ~2× A100/H100-class GPUs — to
       # test the Phase 1 *pattern* on smaller hardware, temporarily point this
-      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/04.
+      # at a small model (e.g. meta/llama-3.2-3b-instruct) per docs/01-01.
       model: openai/mistralai/mixtral-8x7b-instruct-v0.1
       api_base: https://integrate.api.nvidia.com/v1
       api_key: os.environ/NVIDIA_API_KEY
@@ -80,7 +80,7 @@ model_list:
   #
   # ── Template: a CANDIDATE you're evaluating to replace an existing model ───
   # Add it under a NEW name (not the one in use) so you can eval/soak it while
-  # users stay on the current model. See docs/07-evaluating-and-replacing-a-model.md.
+  # users stay on the current model. See docs/01-02-evaluating-and-replacing-a-model.md.
   # - model_name: coder-next            # temporary name; drop it after cutover
   #   litellm_params:
   #     model: openai/<candidate id from the build.nvidia.com model card>
@@ -105,7 +105,7 @@ model_list:
   # handful of requests — so you can watch enforcement kick in well before the
   # free tier's request-rate limit does. Replace them with your own notional
   # per-token rates (fair-use "credits" for an academic service) or, once you
-  # self-host, real amortized cost — and re-run the budget check in docs/02.
+  # self-host, real amortized cost — and re-run the budget check in docs/00-03.
 
 litellm_settings:
   drop_params: true          # ignore client params a backend doesn't support, instead of erroring
@@ -114,13 +114,13 @@ litellm_settings:
   callbacks: ["prometheus"]  # gateway metrics on /metrics (open source since
                              # LiteLLM v1.80.0): request rates and token counts
                              # per model/key. Postgres (/spend) remains the
-                             # billing-grade usage record — see docs/06-monitoring.md.
+                             # billing-grade usage record — see docs/00-06-monitoring.md.
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY   # admin credential — mint user keys with it
   database_url: os.environ/DATABASE_URL       # persistence for keys/users/spend
 
-# ── Guardrails (OFF by default) — see docs/03-guardrails.md ───────────────────
+# ── Guardrails (OFF by default) — see docs/00-04-guardrails.md ───────────────────
 # Presidio is a FIRST-CLASS LiteLLM guardrail: it detects/masks PII and PHI with
 # NER + pattern recognizers and makes NO extra LLM inference calls (unlike NeMo
 # Guardrails' self-check flows). It runs as two sidecars, started by the opt-in
@@ -144,7 +144,7 @@ general_settings:
 #       # presidio_score_thresholds:     # optional: only act above a confidence
 #       #   ALL: 0.7
 #     # default_on: true                 # apply to every request; omit to attach
-#                                        # per-key via metadata (see docs/03).
+#                                        # per-key via metadata (see docs/00-04).
 #
 # Stick to the OpenAI-compatible path (this gateway) for output masking — there's
 # a known bug in output un-masking on the Anthropic-native /v1/messages path.

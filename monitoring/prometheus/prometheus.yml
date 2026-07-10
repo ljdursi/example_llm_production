@@ -5,7 +5,7 @@
 # bundled one exists only so the repo is self-contained. Adjust targets from
 # compose service names (nim-coder, dcgm-exporter) to real hostnames.
 #
-# What to watch, per layer (details in docs/06-monitoring.md):
+# What to watch, per layer (details in docs/00-06-monitoring.md):
 #   gateway (LiteLLM)    → request rates, errors, tokens per model/key
 #   serving layer (NIM)  → request latency, TTFT, queue depth, KV-cache usage
 #   hardware (DCGM)      → GPU utilization, memory, temperature, power

@@ -1,5 +1,18 @@
 # Getting started: Phase 0 in an afternoon
 
+> **Learning objective.** Stand up the whole Phase-0 service — gateway, database,
+> chat UI, and TLS front door — on a GPU-free box, mint a budgeted per-user key,
+> and capture baseline performance and quality numbers, every call going through
+> the gateway.
+>
+> **Infrastructure** · *Phase 0 — gateway + hosted models*.
+> [`.env.example`](../.env.example) ·
+> [`docker-compose.yaml`](../docker-compose.yaml) (gateway · db · webui;
+> `--profile tls` adds [`tls/Caddyfile`](../tls/Caddyfile)) ·
+> [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`Makefile`](../Makefile) (`up`/`tls`/`create-key`/`smoke`/`perf`/`eval`) ·
+> [`tests/`](../tests).
+
 By the end of this page you'll have a running multi-user LLM service — auth,
 accounting, chat UI, tests — with zero GPUs, on any machine with Docker.
 
@@ -55,7 +68,7 @@ curl http://localhost:4000/v1/chat/completions \
 
 Note what you did *not* specify: anything about build.nvidia.com. You asked
 the *service* for the *model name* `coder`. That indirection is the whole
-architecture — see [00-architecture.md](00-architecture.md).
+architecture — see [00-01-architecture.md](00-01-architecture.md).
 
 ## 4. Put it on the network: TLS
 
@@ -83,7 +96,7 @@ specifics and variations: comments in `tls/Caddyfile` and the `caddy` service.)
 One more thing to say out loud before keys go anywhere: in Phase 0, prompts
 are forwarded off-campus to the hosted endpoints. Tell users so, and steer
 restricted data away until Phase 1 brings the model on-prem (see the data
-note in [00-architecture.md](00-architecture.md)).
+note in [00-01-architecture.md](00-01-architecture.md)).
 
 ## 5. Onboard your first researcher
 
@@ -142,12 +155,12 @@ are all still someone else's problem while your team learns the service layer.
 
 Next, in whichever order need dictates:
 
-- more users / models → [02-the-gateway.md](02-the-gateway.md)
-- your own GPUs → [04-swapping-in-self-hosted-nim.md](04-swapping-in-self-hosted-nim.md)
-- wire into your Prometheus/Grafana → [06-monitoring.md](06-monitoring.md)
-- upgrades and a troubleshooting runbook → [10-operating.md](10-operating.md)
+- more users / models → [00-03-the-gateway.md](00-03-the-gateway.md)
+- your own GPUs → [01-01-swapping-in-self-hosted-nim.md](01-01-swapping-in-self-hosted-nim.md)
+- wire into your Prometheus/Grafana → [00-06-monitoring.md](00-06-monitoring.md)
+- upgrades and a troubleshooting runbook → [00-07-operating.md](00-07-operating.md)
 - something to hand your users → [researcher-handout.md](researcher-handout.md)
 
 ---
 
-**◀ Prev** [00 · Architecture](00-architecture.md) · **[Up](../README.md)** · **Next ▶** [02 · The gateway](02-the-gateway.md)
+**◀ Prev** [00-01 · Architecture](00-01-architecture.md) · **[Up](../README.md)** · **Next ▶** [00-03 · The gateway](00-03-the-gateway.md)

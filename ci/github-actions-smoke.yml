@@ -7,7 +7,7 @@
 # service that means a self-hosted runner inside the network — which most
 # institutions running GitHub Enterprise already have.
 #
-# Schedule (see docs/05-testing-performance-and-quality.md): smoke on pushes
+# Schedule (see docs/00-05-testing-performance-and-quality.md): smoke on pushes
 # touching the gateway config; smoke + eval nightly against the live service.
 # (Weekly perf is left out here for brevity — mirror the eval job with
 # `pip install aiperf` + `make perf` and a longer cron.)

@@ -1,5 +1,14 @@
 # Operating the service: network exposure, upgrades, and a small runbook
 
+> **Learning objective.** Keep the running service trustworthy: hold network
+> exposure correct, treat every image-tag bump as a tested upgrade *decision*,
+> and diagnose failures by looking one layer below the symptom.
+>
+> **Infrastructure** · *cross-cutting — all phases*. Pinned image tags in
+> [`docker-compose.yaml`](../docker-compose.yaml) and [`k8s/base/`](../k8s/base) ·
+> [`Makefile`](../Makefile) (`up`/`smoke`/`eval`/`perf`) ·
+> [`tls/Caddyfile`](../tls/Caddyfile).
+
 Phases 0–3 are about *building*; this page is about the day-2 habits that make
 the service trustworthy. None of it is LLM-specific — which is the point: the
 pilot is practice for every service after it.
@@ -7,9 +16,9 @@ pilot is practice for every service after it.
 ## Network exposure (recap)
 
 TLS is part of getting started, not an afterthought — `make tls` and the
-loopback rebind are [01-getting-started.md](01-getting-started.md) step 4,
+loopback rebind are [00-02-getting-started.md](00-02-getting-started.md) step 4,
 and on Kubernetes it's the Ingress + cert-manager path in
-[08-kubernetes.md](08-kubernetes.md). The two rules worth restating as
+[02-01-kubernetes.md](02-01-kubernetes.md). The two rules worth restating as
 *operating* rules:
 
 - The **NIM/backends** are never exposed, on any track: only the gateway
@@ -55,12 +64,12 @@ The failure modes you'll actually see, in the order you'll see them:
 | Phase 1 completions 5xx or hang | `curl nim-host:8000/v1/health/ready`; `docker compose logs nim-coder` | NIM restarted and is reloading weights (minutes), or OOM — check `dcgm` / dmesg |
 | Gateway up but no models listed | `make logs` right after start | YAML error in `litellm-config.yaml` — it fails at config parse |
 | Keys work but no spend rows | gateway logs for DB errors | `DATABASE_URL`/Postgres down; spend writes are async, so this fails quietly |
-| Everything slow, nothing down | Grafana: queue depth & KV-cache panels | saturation, not breakage — this is the [09-scaling-out.md](09-scaling-out.md) trigger |
+| Everything slow, nothing down | Grafana: queue depth & KV-cache panels | saturation, not breakage — this is the [03-01-scaling-out.md](03-01-scaling-out.md) trigger |
 | Chat UI errors but API fine | webui container logs | UI's gateway key revoked, or UI version bump changed config |
 
 The habit that makes the runbook work: **look at the layer below the symptom.**
 Users see the gateway; the gateway sees the backend; the backend sees the GPU.
-One layer per step, and the monitoring from [06-monitoring.md](06-monitoring.md)
+One layer per step, and the monitoring from [00-06-monitoring.md](00-06-monitoring.md)
 is exactly the set of eyes this walk needs.
 
 When you fix something that isn't in this table, add a row. A runbook nobody
@@ -68,4 +77,4 @@ grows is a runbook nobody trusts.
 
 ---
 
-**◀ Prev** [09 · Scaling out](09-scaling-out.md) · **[Up](../README.md)** · **Next ▶** [Researcher handout](researcher-handout.md)
+**◀ Prev** [00-06 · Monitoring](00-06-monitoring.md) · **[Up](../README.md)** · **Next ▶** [01-01 · Self-hosted NIM](01-01-swapping-in-self-hosted-nim.md)

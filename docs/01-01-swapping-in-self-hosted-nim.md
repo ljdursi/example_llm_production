@@ -1,5 +1,15 @@
 # Phase 1: swapping a placeholder for a self-hosted NIM
 
+> **Learning objective.** Bring a model onto your own GPU behind the unchanged
+> gateway: run a NIM via the selfhost overlay, cut routing over with a two-line
+> config change (or a zero-downtime canary), and re-run the suites as the
+> acceptance test — users noticing nothing.
+>
+> **Infrastructure** · *Phase 1 — self-hosted NIM*.
+> [`docker-compose.selfhost.yaml`](../docker-compose.selfhost.yaml) (`nim-coder`) ·
+> the Phase-1 template in [`gateway/litellm-config.yaml`](../gateway/litellm-config.yaml) ·
+> [`Makefile`](../Makefile) (`selfhost`) · `NGC_API_KEY` in [`.env.example`](../.env.example).
+
 The hosted endpoints at build.nvidia.com **are NIM containers run by NVIDIA**.
 Self-hosting means running the same container on your hardware — same model,
 same API, same metrics. That's why this phase is an operations change, not a
@@ -84,7 +94,7 @@ make perf MODEL=coder      # compare to step 1: TTFT likely improves (no WAN);
 Wire up monitoring while the perf run is generating load: the NIM's `/metrics`
 is already listed in `monitoring/prometheus/prometheus.yml`, and the Grafana
 overview dashboard should show queue depth, TTFT, and (with dcgm-exporter
-running) GPU utilization moving. Details: [06-monitoring.md](06-monitoring.md).
+running) GPU utilization moving. Details: [00-06-monitoring.md](00-06-monitoring.md).
 
 Users noticed nothing. Their key, URL, and model name are unchanged.
 
@@ -101,11 +111,11 @@ Users noticed nothing. Their key, URL, and model name are unchanged.
   parts in messages) — another stanza, another container, no new architecture.
 - **A fine-tune of what you serve**: NIM serves LoRA adapters over one base
   deployment, so comparing a researcher's fine-tune against the base is a file
-  copy and a stanza, not a second model — [07b-comparing-fine-tunes-with-lora.md](07b-comparing-fine-tunes-with-lora.md).
+  copy and a stanza, not a second model — [01-03-comparing-fine-tunes-with-lora.md](01-03-comparing-fine-tunes-with-lora.md).
 
 When one box / one replica stops being enough:
-[08-kubernetes.md](08-kubernetes.md), then [09-scaling-out.md](09-scaling-out.md).
+[02-01-kubernetes.md](02-01-kubernetes.md), then [03-01-scaling-out.md](03-01-scaling-out.md).
 
 ---
 
-**◀ Prev** [03 · Guardrails](03-guardrails.md) · **[Up](../README.md)** · **Next ▶** [05 · Testing](05-testing-performance-and-quality.md)
+**◀ Prev** [00-07 · Operating](00-07-operating.md) · **[Up](../README.md)** · **Next ▶** [01-02 · Replacing a model](01-02-evaluating-and-replacing-a-model.md)
