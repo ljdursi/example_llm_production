@@ -32,6 +32,14 @@ UI, client configs) carries over untouched.
   want ≥2× A100/H100-class GPUs at FP16, or one 80GB GPU with an FP8 profile —
   size to the model card before you pull. **Proving the *operational pattern* is
   the point of Phase 1**, not maximizing quality on day one.
+  - *Don't size hardware from `nvidia-smi`.* A NIM (like the vLLM engine under
+    it) pre-allocates most of the GPU's free VRAM for its KV cache at startup, so
+    even this 3B will **display** near-full memory use — e.g. ~40 GB "used" on a
+    48 GB card. That's reservation, not need: it expands to fill whatever you
+    give it and shrinks if you cap it (`gpu-memory-utilization` / the NIM's
+    KV-cache env). Size from the **weights** (above) plus headroom for your
+    context length and concurrency — not from the number the running container
+    happens to show.
 
 ## 1. Capture the "before" picture
 
