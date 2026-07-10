@@ -34,9 +34,11 @@ scrape_configs:
         labels:
           model: coder
 
-  # GPU hardware metrics. Run NVIDIA's DCGM exporter on every GPU node:
-  #   docker run -d --gpus all --net host nvcr.io/nvidia/k8s/dcgm-exporter:latest
-  # (On Kubernetes this becomes a DaemonSet — see k8s/monitoring/.)
+  # GPU hardware metrics from NVIDIA's DCGM exporter. Shipped as the
+  # `dcgm-exporter` service in docker-compose.selfhost.yaml (starts with
+  # `make selfhost`), so this target resolves once you self-host. This job is
+  # down in Phase 0 (no GPU workload yet) — expected. On Kubernetes the GPU
+  # Operator runs dcgm-exporter as a DaemonSet — see k8s/monitoring/.
   - job_name: dcgm
     static_configs:
       - targets: ["dcgm-exporter:9400"]

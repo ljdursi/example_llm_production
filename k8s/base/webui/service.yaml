@@ -1,0 +1,14 @@
+# Cluster-internal Service for the chat UI. Expose it via Ingress if you want
+# browser access from outside the cluster; the gateway is the only component
+# that MUST be externally reachable.
+apiVersion: v1
+kind: Service
+metadata:
+  name: webui
+  labels: { app: webui }
+spec:
+  selector: { app: webui }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

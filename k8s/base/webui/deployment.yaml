@@ -1,0 +1,55 @@
+# Mirror of the `webui` compose service — Open WebUI, itself just another
+# gateway client. Deployment + PVC (it keeps a small sqlite DB of users/chats) +
+# Service. It reaches the gateway in-cluster like any backend; expose it via the
+# same Ingress as the gateway only if you want browser access from outside.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webui
+  labels: { app: webui }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: webui }
+  template:
+    metadata:
+      labels: { app: webui }
+    spec:
+      containers:
+        - name: webui
+          # Pinned; keep in sync with docker-compose.yaml. (License note there:
+          # >50-user deployments may not remove the "Open WebUI" branding.)
+          image: ghcr.io/open-webui/open-webui:v0.10.2
+          ports:
+            - containerPort: 8080
+          env:
+            - name: OPENAI_API_BASE_URL
+              value: http://litellm:4000/v1        # the in-cluster gateway Service
+            # Pilot: the UI uses the master key. For real use, mint it a
+            # dedicated key (make create-key) so its usage shows up separately.
+            - name: OPENAI_API_KEY
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: LITELLM_MASTER_KEY } }
+            - name: ENABLE_OLLAMA_API
+              value: "false"
+            - name: WEBUI_NAME
+              value: "Research LLM Service"
+          volumeMounts:
+            - name: data
+              mountPath: /app/backend/data
+          readinessProbe:
+            httpGet: { path: /health, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: webui-data }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: webui-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi

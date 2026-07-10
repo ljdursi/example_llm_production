@@ -24,9 +24,17 @@ services:
     # `1.x.y`). `latest` is here only so the file runs on first contact;
     # a pinned tag is what makes "rerun the test suites after an upgrade"
     # meaningful — see docs/00-07-operating.md. Model generations also move
-    # (Qwen3-Coder NIMs now exist); check the catalog rather than assuming
-    # this model is still the best fit.
-    image: nvcr.io/nim/qwen/qwen2.5-coder-32b-instruct:latest
+    # (newer and larger coder models exist); check the catalog rather than
+    # assuming this model is still the best fit.
+    #
+    # This is the SAME model `coder` points at in Phase 0 (the hosted
+    # meta/llama-3.2-3b-instruct) — deliberately, so the cutover in docs/01-01
+    # changes the backend, not the model, and your Phase-0 eval baseline is a
+    # valid acceptance test. It's a small 3B: it fits comfortably on ONE modest
+    # GPU (~8-10 GB), which is what makes Phase 1 testable without a multi-GPU
+    # box. For a stronger coder, eval a bigger model under a new name first
+    # (docs/01-02), then repoint `coder`.
+    image: nvcr.io/nim/meta/llama-3.2-3b-instruct:latest
     environment:
       NGC_API_KEY: ${NGC_API_KEY}
     volumes:
@@ -51,37 +59,63 @@ services:
       start_period: 10m
     restart: unless-stopped
 
-  # ── Optional second NIM for the LoRA walkthrough (docs/01-03) ────────────────
+  # ── Second NIM for the LoRA walkthrough (docs/01-03) ─────────────────────────
   # A Llama-3.1-8B base with multi-LoRA turned on, so you can compare a
   # researcher's fine-tune against the base behind the gateway. It's SEPARATE
   # from nim-coder above because a LoRA adapter only loads on the exact base it
-  # was trained on (the example adapter is a Llama-3.1-8B fine-tune, not qwen).
-  # Uncomment to use; bring it up on its own with:
-  #   docker compose -f docker-compose.yaml -f docker-compose.selfhost.yaml up -d nim-general
+  # was trained on: the example adapter is a Llama-3.1-8B fine-tune, whereas the
+  # coder NIM above serves a different base (Llama-3.2-3B).
   #
-  # nim-general:
-  #   image: nvcr.io/nim/meta/llama-3.1-8b-instruct:latest   # PIN the tag (see nim-coder note)
-  #   environment:
-  #     NGC_API_KEY: ${NGC_API_KEY}
-  #     NIM_PEFT_SOURCE: /opt/nim/loras       # directory of adapter subdirs; each
-  #                                           # subdir name becomes a selectable model id
-  #     NIM_PEFT_REFRESH_INTERVAL: "60"       # rescan every 60s → add/remove adapters
-  #                                           # without restarting the NIM
-  #   volumes:
-  #     - nim-cache:/opt/nim/.cache
-  #     - ./loras:/opt/nim/loras              # your adapter tree (see docs/01-03, step 1)
-  #   ports:
-  #     - "8000:8000"                         # or a different host port if nim-coder also runs
-  #   shm_size: 16gb
-  #   deploy:
-  #     resources: { reservations: { devices: [{ driver: nvidia, count: all, capabilities: [gpu] }] } }
-  #   healthcheck:
-  #     test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health/ready')"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 60
-  #     start_period: 10m
-  #   restart: unless-stopped
+  # Gated behind the "lora" compose profile so `make selfhost` does NOT start it
+  # (it would contend with nim-coder for GPUs and host port 8000). Bring it up
+  # on its own — after the Phase-0 stack is running — with:
+  #   make lora
+  # Run one self-hosted NIM at a time on a single-GPU box, or remap the port.
+  nim-general:
+    profiles: ["lora"]
+    image: nvcr.io/nim/meta/llama-3.1-8b-instruct:latest   # PIN the tag (see nim-coder note)
+    environment:
+      NGC_API_KEY: ${NGC_API_KEY}
+      NIM_PEFT_SOURCE: /opt/nim/loras       # directory of adapter subdirs; each
+                                            # subdir name becomes a selectable model id
+      NIM_PEFT_REFRESH_INTERVAL: "60"       # rescan every 60s → add/remove adapters
+                                            # without restarting the NIM
+    volumes:
+      - nim-cache:/opt/nim/.cache
+      - ./loras:/opt/nim/loras              # your adapter tree (see docs/01-03, step 1)
+    ports:
+      - "8000:8000"                         # or a different host port if nim-coder also runs
+    shm_size: 16gb
+    deploy:
+      resources: { reservations: { devices: [{ driver: nvidia, count: all, capabilities: [gpu] }] } }
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health/ready')"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+      start_period: 10m
+    restart: unless-stopped
+
+  # ── GPU hardware metrics (docs/00-06-monitoring.md, layer 3) ─────────────────
+  # NVIDIA's DCGM exporter: GPU utilization, VRAM, temperature, power. Prometheus
+  # already has a `dcgm` job pointed at dcgm-exporter:9400
+  # (monitoring/prometheus/prometheus.yml), and the Grafana overview's GPU panels
+  # read DCGM_FI_DEV_GPU_UTIL / DCGM_FI_DEV_FB_USED. Starts with `make selfhost`,
+  # since GPU metrics only exist once you have a GPU workload to watch.
+  dcgm-exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:4.5.2-4.8.1-ubuntu22.04  # pin like every image here
+    cap_add: ["SYS_ADMIN"]        # DCGM needs it to read the GPU performance counters
+    ports:
+      - "9400:9400"
+    volumes:
+      # Core, non-profiling metric set — see the file header. Works on cloud /
+      # virtualized GPU hosts too (where the DCP profiling module is missing and
+      # the fuller default set would abort the collector). Delete this mount on
+      # bare metal to get NVIDIA's richer defaults.
+      - ./monitoring/dcgm/counters.csv:/etc/dcgm-exporter/default-counters.csv:ro
+    deploy:
+      resources: { reservations: { devices: [{ driver: nvidia, count: all, capabilities: [gpu] }] } }
+    restart: unless-stopped
 
 volumes:
   nim-cache:

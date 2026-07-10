@@ -1,0 +1,27 @@
+# Metrics dcgm-exporter should export, mounted over its
+# /etc/dcgm-exporter/default-counters.csv (see the dcgm-exporter service in
+# docker-compose.selfhost.yaml). Format: DCGM field, prometheus type, help text.
+#
+# This is a DELIBERATELY SMALL core set of *device* fields (utilization, memory,
+# temperature, power, clocks). It is enough to light up the GPU panels in
+# monitoring/grafana/dashboards/llm-overview.json (DCGM_FI_DEV_GPU_UTIL and
+# DCGM_FI_DEV_FB_USED) and to answer "are the GPUs healthy and earning their
+# keep?" (docs/00-06-monitoring.md, layer 3).
+#
+# Why not NVIDIA's fuller default set? The defaults also request DCP *profiling*
+# fields (DCGM_FI_PROF_*: SM/tensor activity, NVLink/PCIe bandwidth). Those need
+# the DCGM profiling module, which is unavailable on many virtualized / shared /
+# cloud GPU hosts — and there a single failing field aborts the WHOLE collector,
+# so you get zero metrics. This core set avoids that and works everywhere.
+#
+# On bare-metal GPU nodes where profiling works, delete the counters.csv volume
+# mount from the dcgm-exporter service to fall back to NVIDIA's richer default
+# set, or add the DCGM_FI_PROF_* fields you want here. The community DCGM Grafana
+# dashboard (grafana.com) expects the fuller set.
+DCGM_FI_DEV_GPU_UTIL,        gauge, GPU utilization (in %).
+DCGM_FI_DEV_MEM_COPY_UTIL,   gauge, Memory copy utilization (in %).
+DCGM_FI_DEV_FB_USED,         gauge, Framebuffer memory used (in MiB).
+DCGM_FI_DEV_FB_FREE,         gauge, Framebuffer memory free (in MiB).
+DCGM_FI_DEV_GPU_TEMP,        gauge, GPU temperature (in C).
+DCGM_FI_DEV_POWER_USAGE,     gauge, Power draw (in W).
+DCGM_FI_DEV_SM_CLOCK,        gauge, SM clock frequency (in MHz).
