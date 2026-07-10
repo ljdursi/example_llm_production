@@ -38,7 +38,7 @@ error. `run-perf.sh` therefore passes `--tokenizer` explicitly, defaulting to
 actually behind the name for accurate input-token counts:
 
 ```bash
-TOKENIZER=Qwen/Qwen2.5-Coder-32B-Instruct make perf MODEL=coder
+TOKENIZER=meta-llama/Llama-3.2-3B-Instruct make perf MODEL=coder
 ```
 
 The counts are approximate across tokenizer families, which is fine here —

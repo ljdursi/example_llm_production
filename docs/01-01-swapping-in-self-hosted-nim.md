@@ -25,11 +25,13 @@ UI, client configs) carries over untouched.
   `docker login nvcr.io -u '$oauthtoken' -p $NGC_API_KEY`.
 - **Sizing:** check the model card's support matrix at build.nvidia.com /
   NGC for GPU + VRAM requirements per precision. Rule of thumb: weights alone
-  need ~2 bytes/parameter at FP16, ~1 at FP8 — a 32B coder model wants ≥2×
-  A100/H100-class GPUs at FP16, or one 80GB GPU with an FP8 profile. **If your
-  pilot hardware is smaller, self-host a smaller model** (e.g. a 7B coder) —
-  proving the *operational pattern* is the point of Phase 1, not matching the
-  hosted model's quality on day one.
+  need ~2 bytes/parameter at FP16, ~1 at FP8. The `coder` model here is
+  `meta/llama-3.2-3b-instruct` — a 3B that fits comfortably on **one modest
+  GPU** (~8-10 GB at FP16), chosen precisely so Phase 1 is testable without a
+  multi-GPU box. A bigger coder (a 32B, or a 47B MoE like Mixtral-8x7B) would
+  want ≥2× A100/H100-class GPUs at FP16, or one 80GB GPU with an FP8 profile —
+  size to the model card before you pull. **Proving the *operational pattern* is
+  the point of Phase 1**, not maximizing quality on day one.
 
 ## 1. Capture the "before" picture
 
@@ -56,7 +58,7 @@ Talk to it *directly* first — worth doing once to see there's no magic:
 
 ```bash
 curl http://localhost:8000/v1/chat/completions -H "Content-Type: application/json" \
-  -d '{"model": "qwen/qwen2.5-coder-32b-instruct", "messages": [{"role":"user","content":"hello"}]}'
+  -d '{"model": "meta/llama-3.2-3b-instruct", "messages": [{"role":"user","content":"hello"}]}'
 curl -s http://localhost:8000/metrics | head    # Prometheus metrics, free of charge
 ```
 
@@ -72,7 +74,7 @@ In `gateway/litellm-config.yaml`, the `coder` stanza's `litellm_params` become
 (the file has this as a template):
 
 ```yaml
-      model: openai/qwen/qwen2.5-coder-32b-instruct
+      model: openai/meta/llama-3.2-3b-instruct
       api_base: http://nim-coder:8000/v1
       api_key: none
 ```
