@@ -1,0 +1,137 @@
+# Multi-LoRA NIM on Kubernetes — the Phase-2 counterpart to the compose
+# `nim-general` service (docs/01-03). A Llama-3.1-8B base with NIM's PEFT
+# (multi-LoRA) turned on, so a researcher's fine-tune is served as a peer model
+# id alongside the base and compared behind the gateway — same as the compose
+# walkthrough, on the k8s track.
+#
+# It's a SEPARATE overlay from the coder NIM (k8s/nim/) so the default
+#   kubectl apply -k k8s/nim/       # coder only
+# is unaffected; bring LoRA up on its own with:
+#   kubectl apply -k k8s/nim-lora/
+#
+# Prereqs (same as k8s/nim/ — see k8s/README.md): the NVIDIA GPU Operator, the
+# `ngc-registry` image-pull secret, and `llm-secrets` carrying NGC_API_KEY.
+#
+# Adapters live on a PVC mounted at /opt/nim/loras (NIM_PEFT_SOURCE), rescanned
+# every NIM_PEFT_REFRESH_INTERVAL seconds — the k8s analog of the compose
+# ./loras bind mount. The initContainer populates that PVC with the example
+# Greek-dialect adapter (docs/01-03, step 1) the first time, idempotently.
+#
+# To serve YOUR OWN adapter instead: either edit the initContainer's repo id, or
+# drop the adapter onto the PVC yourself (one subdir per adapter, the subdir
+# name becomes the model id) — e.g. `kubectl -n llm-service cp ./loras/my-adapter
+# <pod>:/opt/nim/loras/my-adapter`. NIM picks it up within the refresh interval,
+# no restart. Locked-down clusters with no PyPI/HF egress should drop the
+# initContainer and use the kubectl-cp path.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nim-general
+  labels: { app: nim-general }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: nim-general }
+  template:
+    metadata:
+      labels: { app: nim-general }
+      annotations:
+        # Scraped by the ServiceMonitor in k8s/monitoring/ (nim-general is in its selector).
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      imagePullSecrets:
+        - name: ngc-registry
+      initContainers:
+        # Populate the adapter PVC with the example adapter (idempotent). Mirrors
+        # docs/01-03 step 1: hf download + drop the adapter's own tokenizer files
+        # so the base NIM's tokenizer stays authoritative.
+        - name: fetch-adapter
+          image: python:3.12-slim
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              D=/loras/llama31-8b-greek-dialect
+              if [ -f "$D/adapter_config.json" ]; then echo "adapter present; skip"; exit 0; fi
+              pip install --quiet huggingface_hub
+              mkdir -p "$D"
+              hf download Stergios/llama3.1-8b-instruct-lora --local-dir "$D"
+              rm -f "$D"/tokenizer*.json "$D"/special_tokens_map.json "$D"/chat_template.jinja
+              echo "adapter ready:"; ls "$D"
+          volumeMounts:
+            - { name: loras, mountPath: /loras }
+      containers:
+        - name: nim
+          # Pin the tag before relying on this (keep in sync with the compose
+          # nim-general note). This base MUST match the adapter's base model.
+          image: nvcr.io/nim/meta/llama-3.1-8b-instruct:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: NGC_API_KEY
+              valueFrom: { secretKeyRef: { name: llm-secrets, key: NGC_API_KEY } }
+            - name: NIM_PEFT_SOURCE          # directory of adapter subdirs
+              value: /opt/nim/loras
+            - name: NIM_PEFT_REFRESH_INTERVAL # rescan every 60s → drop-in adapters, no restart
+              value: "60"
+          resources:
+            limits:
+              nvidia.com/gpu: 1        # an 8B fits one GPU; size to the model card
+              memory: 24Gi
+            requests:
+              cpu: "4"
+              memory: 12Gi
+          volumeMounts:
+            - { name: model-cache, mountPath: /opt/nim/.cache }
+            - { name: loras, mountPath: /opt/nim/loras }
+            - { name: dshm, mountPath: /dev/shm }
+          startupProbe:
+            httpGet: { path: /v1/health/ready, port: 8000 }
+            failureThreshold: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /v1/health/ready, port: 8000 }
+            periodSeconds: 15
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim: { claimName: nim-general-cache }
+        - name: loras
+          persistentVolumeClaim: { claimName: nim-general-loras }
+        - name: dshm
+          emptyDir: { medium: Memory, sizeLimit: 16Gi }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nim-general-cache
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 60Gi   # model weights + built engines
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nim-general-loras
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi    # adapter tree (adapters are ~100s of MB each)
+---
+# The gateway routes to this name: http://nim-general.llm-service:8000/v1
+# (add two stanzas — `general` at the base id, `general-lora` at the adapter's
+# directory name — to gateway/litellm-config.yaml; see docs/01-03.)
+apiVersion: v1
+kind: Service
+metadata:
+  name: nim-general
+  labels: { app: nim-general }
+spec:
+  selector: { app: nim-general }
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

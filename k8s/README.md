@@ -10,6 +10,7 @@ learn the mapping by diffing:
 | `db` | `base/postgres/` | volume → PersistentVolumeClaim via StatefulSet |
 | `webui` | `base/webui/` | Deployment + PVC (sqlite state) + Service; points at the in-cluster `litellm` Service. Expose via Ingress only for outside browser access |
 | `nim-coder` (selfhost overlay) | `nim/` | `--gpus` → `resources.limits."nvidia.com/gpu"`; needs the [NVIDIA GPU Operator](https://github.com/NVIDIA/gpu-operator) on the cluster |
+| `nim-general` (LoRA, `lora` profile) | `nim-lora/` | multi-LoRA NIM; `./loras` bind mount → a PVC populated by an init container; separate overlay (`kubectl apply -k k8s/nim-lora/`). See docs/01-03 |
 | prometheus scrape config | `monitoring/servicemonitor.yaml` | static targets → ServiceMonitor discovered by your Prometheus Operator |
 
 ## Deploy
